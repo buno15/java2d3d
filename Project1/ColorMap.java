@@ -1,11 +1,13 @@
 package Project1;
 
-import java.awt.Color;
+public class ColorMap {
+    double scalar;
+    double r, g, b;
 
-class ColorMap {
-    // スカラー値から色を計算するメソッド
-    // Color getColor(double value) {
-    // // カラーマッピングロジックを実装
-    // return new Color(...); // RGB値に変換
-    // }
+    public ColorMap(double scalar, double r, double g, double b) {
+        this.scalar = scalar;
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
 }
