@@ -13,4 +13,8 @@ public class Point {
     void setScalars(double scalars) {
         this.scalars = scalars;
     }
+
+    void normalizedScalars(double minScalar, double maxScalar) {
+        scalars = (scalars - minScalar) / (maxScalar - minScalar);
+    }
 }

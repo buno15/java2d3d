@@ -11,7 +11,25 @@ public class VTKReader {
     static List<Triangle> triangles = new ArrayList<>();
     static List<Integer> cellTypes = new ArrayList<>();
 
+    static Point minPoint = new Point(Double.MAX_VALUE, Double.MAX_VALUE, 0);
+    static Point maxPoint = new Point(Double.MIN_VALUE, Double.MIN_VALUE, 0);
+
+    static double minScalar = Double.MAX_VALUE;
+    static double maxScalar = Double.MIN_VALUE;
+
+    public static void clearData() {
+        points.clear();
+        triangles.clear();
+        cellTypes.clear();
+        minPoint = new Point(Double.MAX_VALUE, Double.MAX_VALUE, 0);
+        maxPoint = new Point(Double.MIN_VALUE, Double.MIN_VALUE, 0);
+        minScalar = Double.MAX_VALUE;
+        maxScalar = Double.MIN_VALUE;
+    }
+
     public static void readVTKFile(String fileName) {
+        clearData();
+
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line = "";
             while ((line = br.readLine()) != null) {
@@ -19,10 +37,15 @@ public class VTKReader {
                     int size = Integer.parseInt(br.readLine().split(" ")[1]);
                     for (int i = 0; i < size; i++) {
                         String[] array = br.readLine().split(" ");
-                        double p1 = Double.parseDouble(array[0]) * 30 + 500;
-                        double p2 = Double.parseDouble(array[1]) * 30 + 200;
+                        double p1 = Double.parseDouble(array[0]);
+                        double p2 = Double.parseDouble(array[1]);
                         double p3 = Double.parseDouble(array[2]);
                         points.add(new Point(p1, p2, p3));
+
+                        minPoint.x = Math.min(minPoint.x, p1);
+                        minPoint.y = Math.min(minPoint.y, p2);
+                        maxPoint.x = Math.max(maxPoint.x, p1);
+                        maxPoint.y = Math.max(maxPoint.y, p2);
                     }
                 } else if (line.startsWith("CELLS")) {
                     int size = Integer.parseInt(line.split(" ")[1]);
@@ -50,6 +73,9 @@ public class VTKReader {
                     for (int i = 0; i < size; i++) {
                         double value = Double.parseDouble(br.readLine());
                         points.get(i).setScalars(value);
+
+                        minScalar = Math.min(minScalar, value);
+                        maxScalar = Math.max(maxScalar, value);
                     }
                 }
             }

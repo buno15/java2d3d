@@ -14,22 +14,22 @@ public class ColorMap {
         this.b = b;
     }
 
-    public static Color getColorForIsoValue(double isoValue, List<ColorMap> colorMaps) {
-        ColorMap closestColorMap = null;
-        double minDifference = Double.MAX_VALUE;
+    public static Color getColorFromScalar(double scalar, double minScalar, double maxScalar,
+            List<ColorMap> colorMaps) {
+        double normalizedScalar = (scalar - minScalar) / (maxScalar - minScalar);
 
-        for (ColorMap colorMap : colorMaps) {
-            double difference = Math.abs(colorMap.scalar - isoValue);
-            if (difference < minDifference) {
-                minDifference = difference;
-                closestColorMap = colorMap;
+        for (int i = 0; i < colorMaps.size() - 1; i++) {
+            ColorMap lower = colorMaps.get(i);
+            ColorMap upper = colorMaps.get(i + 1);
+            if (normalizedScalar >= lower.scalar && normalizedScalar <= upper.scalar) {
+                double ratio = (normalizedScalar - lower.scalar) / (upper.scalar - lower.scalar);
+                double r = lower.r + ratio * (upper.r - lower.r);
+                double g = lower.g + ratio * (upper.g - lower.g);
+                double b = lower.b + ratio * (upper.b - lower.b);
+                return new Color((float) r, (float) g, (float) b);
             }
         }
 
-        if (closestColorMap != null) {
-            return new Color((float) closestColorMap.r, (float) closestColorMap.g, (float) closestColorMap.b);
-        } else {
-            return Color.BLACK;
-        }
+        return Color.BLACK;
     }
 }
