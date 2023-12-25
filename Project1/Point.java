@@ -17,4 +17,13 @@ public class Point {
     void normalizedScalars(double minScalar, double maxScalar) {
         scalars = (scalars - minScalar) / (maxScalar - minScalar);
     }
+
+    Point scaleAndTransformPoint(double scaleX, double scaleY, Point minPoint, Point maxPoint) {
+        double transformedX = (x - minPoint.x) * scaleX;
+        double transformedY = (maxPoint.y - y) * scaleY;
+
+        Point np = new Point(transformedX, transformedY, 0);
+        np.setScalars(scalars);
+        return np;
+    }
 }

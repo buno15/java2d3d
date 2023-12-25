@@ -3,53 +3,45 @@ package Project1;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 
 public class FilledContourPlotPanel extends JPanel {
-    List<Point> points;
-    List<Triangle> triangles;
-    List<ColorMap> colorMaps;
-    List<Double> isoValues = new ArrayList<>();
-    List<ContourLine> contourLines;
+    private List<Triangle> triangles;
+    private List<ColorMap> colorMaps;
 
-    Point minPoint;
-    Point maxPoint;
+    private Point minPoint;
+    private Point maxPoint;
 
-    double minScalar;
-    double maxScalar;
+    private double minScalar;
+    private double maxScalar;
 
-    double topMargin = 0;
-    double leftMargin = 0;
+    private double topMargin = 0;
+    private double leftMargin = 0;
 
-    double scaleWidth = 1;
-    double scaleHeight = 1;
+    private double scaleWidth = 1;
+    private double scaleHeight = 1;
 
-    public FilledContourPlotPanel(List<Point> points, List<Triangle> triangles,
-            List<ColorMap> colorMaps, List<ContourLine> contourLines, List<Double> isoValues, Point minPoint,
+    private static final double EPS = 1e-9;
+
+    public FilledContourPlotPanel(List<Triangle> triangles,
+            List<ColorMap> colorMaps, Point minPoint,
             Point maxPoint, double minScalar,
             double maxScalar) {
-        this.points = points;
         this.triangles = triangles;
         this.colorMaps = colorMaps;
-        this.contourLines = contourLines;
-        this.isoValues = isoValues;
         this.minPoint = minPoint;
         this.maxPoint = maxPoint;
         this.minScalar = minScalar;
         this.maxScalar = maxScalar;
     }
 
-    public void setData(List<Point> points, List<Triangle> triangles, List<ColorMap> colorMaps,
-            List<ContourLine> contourLines, List<Double> isoValues, Point minPoint, Point maxPoint, double minScalar,
+    public void reloadData(List<Triangle> triangles, List<ColorMap> colorMaps,
+            Point minPoint, Point maxPoint, double minScalar,
             double maxScalar) {
-        this.points = points;
         this.triangles = triangles;
         this.colorMaps = colorMaps;
-        this.contourLines = contourLines;
-        this.isoValues = isoValues;
         this.minPoint = minPoint;
         this.maxPoint = maxPoint;
         this.minScalar = minScalar;
@@ -76,25 +68,25 @@ public class FilledContourPlotPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawFilledContour(g);
-        System.out.println("FilledContourPlotPanel");
+        System.out.println("Plot FilledContourPlotPanel");
     }
 
-    void drawFilledContour(Graphics g) {
+    private void drawFilledContour(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 
         final double scaleX = getWidth() / (maxPoint.x - minPoint.x) * scaleWidth;
         final double scaleY = 600 / (maxPoint.y - minPoint.y) * scaleHeight;
 
         for (Triangle triangle : triangles) {
-            Point p1 = scaleAndTransformPoint(triangle.vertices[0], scaleX, scaleY);
-            Point p2 = scaleAndTransformPoint(triangle.vertices[1], scaleX, scaleY);
-            Point p3 = scaleAndTransformPoint(triangle.vertices[2], scaleX, scaleY);
+            Point p1 = triangle.vertices[0].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
+            Point p2 = triangle.vertices[1].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
+            Point p3 = triangle.vertices[2].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
 
             for (int x = (int) Math.min(Math.min(p1.x, p2.x), p3.x); x <= Math.max(Math.max(p1.x, p2.x), p3.x); x++) {
                 for (int y = (int) Math.min(Math.min(p1.y, p2.y), p3.y); y <= Math.max(Math.max(p1.y, p2.y),
                         p3.y); y++) {
                     if (isInsideTriangle(p1, p2, p3, x, y)) {
-                        Color color = interpolateColor(triangle, x, y, scaleX, scaleY);
+                        Color color = setPointColor(triangle, x, y, scaleX, scaleY);
                         g2d.setColor(color);
                         g2d.drawLine((int) (x + leftMargin), (int) (y + topMargin), (int) (x + leftMargin),
                                 (int) (y + topMargin));
@@ -104,28 +96,20 @@ public class FilledContourPlotPanel extends JPanel {
         }
     }
 
-    private Point scaleAndTransformPoint(Point p, double scaleX, double scaleY) {
-        double transformedX = (p.x - minPoint.x) * scaleX;
-        double transformedY = (maxPoint.y - p.y) * scaleY;
-
-        Point np = new Point(transformedX, transformedY, 0);
-        np.setScalars(p.scalars);
-        return np;
-    }
-
     private boolean isInsideTriangle(Point p1, Point p2, Point p3, double x, double y) {
         double denominator = ((p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y));
         double a = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y)) / denominator;
         double b = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y)) / denominator;
         double c = 1 - a - b;
 
-        return 0 <= a && a <= 1 && 0 <= b && b <= 1 && 0 <= c && c <= 1;
+        return -EPS <= a && a <= 1 + EPS && -EPS <= b && b <= 1 + EPS && -EPS <= c
+                && c <= 1 + EPS;
     }
 
-    private Color interpolateColor(Triangle triangle, double x, double y, double scaleX, double scaleY) {
-        Point p1 = scaleAndTransformPoint(triangle.vertices[0], scaleX, scaleY);
-        Point p2 = scaleAndTransformPoint(triangle.vertices[1], scaleX, scaleY);
-        Point p3 = scaleAndTransformPoint(triangle.vertices[2], scaleX, scaleY);
+    private Color setPointColor(Triangle triangle, double x, double y, double scaleX, double scaleY) {
+        Point p1 = triangle.vertices[0].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
+        Point p2 = triangle.vertices[1].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
+        Point p3 = triangle.vertices[2].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
 
         Color c1 = ColorMap.getColorFromScalar(p1.scalars, minScalar, maxScalar, colorMaps);
         Color c2 = ColorMap.getColorFromScalar(p2.scalars, minScalar, maxScalar, colorMaps);

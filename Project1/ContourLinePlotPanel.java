@@ -7,28 +7,26 @@ import java.util.List;
 import javax.swing.JPanel;
 
 class ContourLinePlotPanel extends JPanel {
-    List<Point> points;
-    List<Triangle> triangles;
-    List<ColorMap> colorMaps;
-    List<Double> isoValues = new ArrayList<>();
-    List<ContourLine> contourLines = new ArrayList<>();
+    private List<Triangle> triangles;
+    private List<ColorMap> colorMaps;
+    private List<Double> isoValues = new ArrayList<>();
+    private List<ContourLine> contourLines = new ArrayList<>();
 
-    Point minPoint;
-    Point maxPoint;
+    private Point minPoint;
+    private Point maxPoint;
 
-    double minScalar;
-    double maxScalar;
+    private double minScalar;
+    private double maxScalar;
 
-    double topMargin = 0;
-    double leftMargin = 0;
+    private double topMargin = 0;
+    private double leftMargin = 0;
 
-    double scaleWidth = 1;
-    double scaleHeight = 1;
+    private double scaleWidth = 1;
+    private double scaleHeight = 1;
 
-    public ContourLinePlotPanel(List<Point> points, List<Triangle> triangles,
+    public ContourLinePlotPanel(List<Triangle> triangles,
             List<ColorMap> colorMaps, List<Double> isoValues, Point minPoint, Point maxPoint, double minScalar,
             double maxScalar) {
-        this.points = points;
         this.triangles = triangles;
         this.colorMaps = colorMaps;
         this.isoValues = isoValues;
@@ -38,9 +36,8 @@ class ContourLinePlotPanel extends JPanel {
         this.maxScalar = maxScalar;
     }
 
-    public void setData(List<Point> points, List<Triangle> triangles, List<ColorMap> colorMaps,
+    public void reloadData(List<Triangle> triangles, List<ColorMap> colorMaps,
             List<Double> isoValues, Point minPoint, Point maxPoint, double minScalar, double maxScalar) {
-        this.points = points;
         this.triangles = triangles;
         this.colorMaps = colorMaps;
         this.isoValues = isoValues;
@@ -101,21 +98,12 @@ class ContourLinePlotPanel extends JPanel {
         }
     }
 
-    private Point scaleAndTransformPoint(Point p, double scaleX, double scaleY) {
-        double transformedX = (p.x - minPoint.x) * scaleX;
-        double transformedY = (maxPoint.y - p.y) * scaleY;
-
-        Point np = new Point(transformedX, transformedY, 0);
-        np.setScalars(p.scalars);
-        return np;
-    }
-
     // Find intersection points based on triangle and isoValue
     private List<Point> findIntersectionPoints(Triangle triangle, double isoValue, double scaleX, double scaleY) {
         List<Point> intersectioniPoints = new ArrayList<>(); // intersection points
         for (int i = 0; i < 3; i++) {
-            Point p1 = scaleAndTransformPoint(triangle.vertices[i], scaleX, scaleY);
-            Point p2 = scaleAndTransformPoint(triangle.vertices[(i + 1) % 3], scaleX, scaleY);
+            Point p1 = triangle.vertices[i].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
+            Point p2 = triangle.vertices[(i + 1) % 3].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
 
             p1.normalizedScalars(minScalar, maxScalar);
             p2.normalizedScalars(minScalar, maxScalar);
