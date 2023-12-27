@@ -82,28 +82,40 @@ public class FilledContourPlotPanel extends JPanel {
             Point p2 = triangle.vertices[1].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
             Point p3 = triangle.vertices[2].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
 
-            for (int x = (int) Math.min(Math.min(p1.x, p2.x), p3.x); x <= Math.max(Math.max(p1.x, p2.x), p3.x); x++) {
-                for (int y = (int) Math.min(Math.min(p1.y, p2.y), p3.y); y <= Math.max(Math.max(p1.y, p2.y),
-                        p3.y); y++) {
-                    if (isInsideTriangle(p1, p2, p3, x, y)) {
+            int minX = (int) Math.min(Math.min(p1.x, p2.x), p3.x);
+            int maxX = (int) Math.max(Math.max(p1.x, p2.x), p3.x);
+            int minY = (int) Math.min(Math.min(p1.y, p2.y), p3.y);
+            int maxY = (int) Math.max(Math.max(p1.y, p2.y), p3.y);
+
+            for (int x = minX; x <= maxX; x++) {
+                for (int y = minY; y <= maxY; y++) {
+                    if (isPointInTriangle(new Point(x, y, 0), p1, p2, p3)) {
                         Color color = setPointColor(triangle, x, y, scaleX, scaleY);
                         g2d.setColor(color);
-                        g2d.drawLine((int) (x + leftMargin), (int) (y + topMargin), (int) (x + leftMargin),
-                                (int) (y + topMargin));
+
+                        int px = (int) (x + leftMargin);
+                        int py = (int) (y + topMargin);
+
+                        g2d.drawLine(px, py, px, py);
                     }
                 }
             }
         }
     }
 
-    private boolean isInsideTriangle(Point p1, Point p2, Point p3, double x, double y) {
-        double denominator = ((p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y));
-        double a = ((p2.y - p3.y) * (x - p3.x) + (p3.x - p2.x) * (y - p3.y)) / denominator;
-        double b = ((p3.y - p1.y) * (x - p3.x) + (p1.x - p3.x) * (y - p3.y)) / denominator;
-        double c = 1 - a - b;
+    private double crossProduct(Point a, Point b, Point c) {
+        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    }
 
-        return -EPS <= a && a <= 1 + EPS && -EPS <= b && b <= 1 + EPS && -EPS <= c
-                && c <= 1 + EPS;
+    private boolean isPointInTriangle(Point p, Point v1, Point v2, Point v3) {
+        double c1 = crossProduct(v1, v2, p);
+        double c2 = crossProduct(v2, v3, p);
+        double c3 = crossProduct(v3, v1, p);
+
+        boolean hasNegative = (c1 < 0) || (c2 < 0) || (c3 < 0);
+        boolean hasPositive = (c1 > 0) || (c2 > 0) || (c3 > 0);
+
+        return !(hasNegative && hasPositive);
     }
 
     private Color setPointColor(Triangle triangle, double x, double y, double scaleX, double scaleY) {

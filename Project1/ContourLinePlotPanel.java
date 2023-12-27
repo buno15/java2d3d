@@ -1,6 +1,7 @@
 package Project1;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,7 @@ class ContourLinePlotPanel extends JPanel {
     }
 
     private void drawContourLines(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
         contourLines.clear();
 
         final double scaleX = getWidth() / (maxPoint.x - minPoint.x) * scaleWidth;
@@ -84,7 +86,7 @@ class ContourLinePlotPanel extends JPanel {
                 List<Point> intersectioniPoints = findIntersectionPoints(triangle, isoValue, scaleX, scaleY);
                 if (intersectioniPoints.size() == 2) {
                     contourLines.get(i).addSegment(intersectioniPoints.get(0), intersectioniPoints.get(1), triangle);
-                    g.setColor(ColorMap.getColorFromScalar(isoValue, 0, 1, colorMaps));
+                    g2d.setColor(ColorMap.getColorFromScalar(isoValue, 0, 1, colorMaps));
 
                     int x1 = (int) (intersectioniPoints.get(0).x + leftMargin);
                     int y1 = (int) (intersectioniPoints.get(0).y + topMargin);
@@ -92,7 +94,7 @@ class ContourLinePlotPanel extends JPanel {
                     int x2 = (int) (intersectioniPoints.get(1).x + leftMargin);
                     int y2 = (int) (intersectioniPoints.get(1).y + topMargin);
 
-                    g.drawLine(x1, y1, x2, y2);
+                    g2d.drawLine(x1, y1, x2, y2);
                 }
             }
         }

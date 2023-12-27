@@ -103,7 +103,7 @@ class ContourPlotMain {
         fcLabel.setHorizontalAlignment(JLabel.CENTER);
         fcLabel.setFont(new Font("Arial", Font.BOLD, 32));
 
-        Border border = BorderFactory.createLineBorder(Color.decode("#c2c2c2"), 10);
+        Border border = BorderFactory.createLineBorder(Color.decode("#c2c2c2"), 1);
         clPanel.setBorder(border);
         fcPanel.setBorder(border);
 
