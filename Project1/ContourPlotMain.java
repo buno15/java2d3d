@@ -145,6 +145,7 @@ class ContourPlotMain {
         frame.setVisible(true);
     }
 
+    // This method is used to update the plot.
     static void update(String filePath) {
         if (filePath.equals(""))
             return;
@@ -168,6 +169,7 @@ class ContourPlotMain {
         fcPanel.repaint();
     }
 
+    // This method is used to refresh the list of iso values.
     private static void refreshList(JPanel panel) {
         panel.removeAll();
 

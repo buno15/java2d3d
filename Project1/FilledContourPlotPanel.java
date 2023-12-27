@@ -23,8 +23,6 @@ public class FilledContourPlotPanel extends JPanel {
     private double scaleWidth = 1;
     private double scaleHeight = 1;
 
-    private static final double EPS = 1e-9;
-
     public FilledContourPlotPanel(List<Triangle> triangles,
             List<ColorMap> colorMaps, Point minPoint,
             Point maxPoint, double minScalar,
@@ -103,10 +101,12 @@ public class FilledContourPlotPanel extends JPanel {
         }
     }
 
+    // calculate cross product
     private double crossProduct(Point a, Point b, Point c) {
         return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     }
 
+    // check if point is in triangle
     private boolean isPointInTriangle(Point p, Point v1, Point v2, Point v3) {
         double c1 = crossProduct(v1, v2, p);
         double c2 = crossProduct(v2, v3, p);
@@ -118,6 +118,7 @@ public class FilledContourPlotPanel extends JPanel {
         return !(hasNegative && hasPositive);
     }
 
+    // set point color
     private Color setPointColor(Triangle triangle, double x, double y, double scaleX, double scaleY) {
         Point p1 = triangle.vertices[0].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
         Point p2 = triangle.vertices[1].scaleAndTransformPoint(scaleX, scaleY, minPoint, maxPoint);
@@ -137,6 +138,7 @@ public class FilledContourPlotPanel extends JPanel {
         double ratio2 = area2 / totalArea;
         double ratio3 = area3 / totalArea;
 
+        // calculate color by area ratio
         double r = c1.getRed() * ratio1 + c2.getRed() * ratio2 + c3.getRed() * ratio3;
         double g = c1.getGreen() * ratio1 + c2.getGreen() * ratio2 + c3.getGreen() * ratio3;
         double b = c1.getBlue() * ratio1 + c2.getBlue() * ratio2 + c3.getBlue() * ratio3;
@@ -144,6 +146,7 @@ public class FilledContourPlotPanel extends JPanel {
         return new Color((int) r, (int) g, (int) b);
     }
 
+    // calculate triangle area
     private double calculateTriangleArea(Point p1, Point p2, Point p3) {
         double a = calculateDistance(p1, p2);
         double b = calculateDistance(p2, p3);
@@ -153,6 +156,7 @@ public class FilledContourPlotPanel extends JPanel {
         return Math.sqrt(s * (s - a) * (s - b) * (s - c));
     }
 
+    // calculate distance between two points
     private double calculateDistance(Point p1, Point p2) {
         return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
     }

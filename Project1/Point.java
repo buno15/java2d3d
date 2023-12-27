@@ -14,10 +14,12 @@ public class Point {
         this.scalars = scalars;
     }
 
+    // Normalize the scalars to [0, 1]
     void normalizedScalars(double minScalar, double maxScalar) {
         scalars = (scalars - minScalar) / (maxScalar - minScalar);
     }
 
+    // Scale and transform the point to the new coordinate system.
     Point scaleAndTransformPoint(double scaleX, double scaleY, Point minPoint, Point maxPoint) {
         double transformedX = (x - minPoint.x) * scaleX;
         double transformedY = (maxPoint.y - y) * scaleY;

@@ -14,6 +14,7 @@ public class ColorMap {
         this.b = b;
     }
 
+    // This method is used to get the color from the scalar value.
     public static Color getColorFromScalar(double scalar, double minScalar, double maxScalar,
             List<ColorMap> colorMaps) {
         double normalizedScalar = (scalar - minScalar) / (maxScalar - minScalar);
