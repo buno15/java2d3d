@@ -1,39 +1,64 @@
 package src;
 
-import java.io.FileReader;
+import java.awt.BorderLayout;
+import java.awt.GraphicsConfiguration;
 
 import javax.swing.JFrame;
 
+import org.jogamp.java3d.Alpha;
+import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Canvas3D;
-import org.jogamp.java3d.loaders.Scene;
-import org.jogamp.java3d.loaders.objectfile.ObjectFile;
+import org.jogamp.java3d.RotationInterpolator;
+import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.utils.geometry.ColorCube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
+import org.jogamp.vecmath.Point3d;
 
 public class App {
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Java 3D OBJ Viewer");
+        JFrame frame = new JFrame();
+        frame.setSize(640, 480);
+        frame.setLayout(new BorderLayout());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Canvas3D canvas3D = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
-        frame.add(canvas3D);
-        frame.setSize(800, 600);
+
+        GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
+
+        System.out.println("Graphics configuration: " + cf);
+
+        Canvas3D canvas = new Canvas3D(cf);
+        frame.add("Center", canvas);
+
+        SimpleUniverse univ = new SimpleUniverse(canvas);
+        univ.getViewingPlatform().setNominalViewingTransform();
+
+        BranchGroup scene = createSceneGraph();
+        scene.compile();
+        univ.addBranchGraph(scene);
+
         frame.setVisible(true);
+    }
 
-        SimpleUniverse universe = new SimpleUniverse(canvas3D);
-        universe.getViewingPlatform().setNominalViewingTransform();
+    private static BranchGroup createSceneGraph() {
+        // Make a scene graph branch
+        BranchGroup branch = new BranchGroup();
 
-        BranchGroup sceneGroup = new BranchGroup();
-        ObjectFile loader = new ObjectFile(ObjectFile.RESIZE);
-        Scene scene = null;
+        // Make a changeable 3D transform
+        TransformGroup trans = new TransformGroup();
+        trans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        branch.addChild(trans);
 
-        try {
-            scene = loader.load(new FileReader("/Project2/test_data/armadillo.obj"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        // Make a shape
+        ColorCube demo = new ColorCube(0.4);
+        trans.addChild(demo);
 
-        sceneGroup.addChild(scene.getSceneGroup());
-        universe.addBranchGraph(sceneGroup);
+        // Make a behavor to spin the shape
+        Alpha spinAlpha = new Alpha(-1, 4000);
+        RotationInterpolator spinner = new RotationInterpolator(spinAlpha, trans);
+        spinner.setSchedulingBounds(
+                new BoundingSphere(new Point3d(), 1000.0));
+        trans.addChild(spinner);
+
+        return branch;
     }
 }
