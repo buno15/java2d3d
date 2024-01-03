@@ -1,5 +1,6 @@
 package src;
 
+import java.awt.BorderLayout;
 import java.awt.GraphicsConfiguration;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,12 +10,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.Background;
@@ -52,46 +52,54 @@ import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3d;
 import org.jogamp.vecmath.Vector3f;
 
-public class App extends JFrame {
+public class ViewerPanel extends JPanel {
+    private final Color3f BLACK = new Color3f(0.0f, 0.0f, 0.0f);
+    private final Color3f WHITE = new Color3f(1.0f, 1.0f, 1.0f);
+    private final Color3f GRAY = new Color3f(0.4f, 0.4f, 0.4f);
 
-    public App() {
-        setSize(640, 480);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    static final int MODE_POINT_CLOUD = 1;
+    static final int MODE_WIREFRAME = 2;
+    static final int MODE_WIREFRAME_FILL = 3;
+    static final int MODE_SMOOTH_SHADING = 4;
+    static final int MODE_FLAT_SHADING = 5;
+
+    private String fileName;
+    private int viewMode = MODE_POINT_CLOUD;
+
+    private Canvas3D canvas;
+    private BranchGroup contentScene;
+
+    @Override
+    public void paintComponent(java.awt.Graphics g) {
+        super.paintComponent(g);
+    }
+
+    public ViewerPanel(int viewMode, String fileName) {
+        this.viewMode = viewMode;
+        this.fileName = fileName;
+        System.out.println(this.viewMode + " : " + this.fileName);
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
 
-        Canvas3D canvas = new Canvas3D(cf);
+        setLayout(new BorderLayout());
+        canvas = new Canvas3D(cf);
         add("Center", canvas);
+        add(canvas, BorderLayout.CENTER);
+        setOpaque(true);
 
-        SimpleUniverse univ = new SimpleUniverse(canvas);
-        setupViewingEnvironment(univ);
-        univ.getViewingPlatform().setNominalViewingTransform();
-
-        BranchGroup scene = new BranchGroup();
-        Background background = new Background(new Color3f(1.0f, 1.0f, 1.0f));
-        background.setApplicationBounds(new BoundingSphere(new Point3d(0.0, 0.0,
-                0.0), 100.0));
-        scene.addChild(background);
-
-        // addPointCloudToScene(scene, "./test_data/turtle.obj", canvas);
-
-        scene.addChild(createSphere(0.8, 0.0, 0.0, "./test_data/teddy.obj",
-                canvas));
-        addLight(scene);
-
-        scene.compile();
-
-        univ.addBranchGraph(scene);
-
-        saveObjFile(scene, "./test_data/teapot.xyz");
-
-        setVisible(true);
-
-        exploreNode(scene, 0);
-    }
-
-    private void setupViewingEnvironment(SimpleUniverse universe) {
+        SimpleUniverse universe = new SimpleUniverse(canvas);
         ViewingPlatform viewingPlatform = universe.getViewingPlatform();
+        BranchGroup rootScene = new BranchGroup();
+        rootScene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+        rootScene.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+        rootScene.setCapability(BranchGroup.ALLOW_DETACH);
+        rootScene.setName("Root Scene");
+
+        contentScene = new BranchGroup();
+        contentScene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+        contentScene.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+        contentScene.setCapability(BranchGroup.ALLOW_DETACH);
+        contentScene.setName("Content Scene");
 
         // camera position
         TransformGroup viewTransformGroup = viewingPlatform.getViewPlatformTransform();
@@ -102,62 +110,72 @@ public class App extends JFrame {
 
         // view direction
         View view = universe.getViewer().getView();
-        double frontClipDistance = 0.1;
-        double backClipDistance = 100.0;
+        double frontClipDistance = 0.001;
+        double backClipDistance = 1000.0;
         view.setFrontClipDistance(frontClipDistance);
         view.setBackClipDistance(backClipDistance);
+        universe.getViewingPlatform().setNominalViewingTransform();
+
+        // background color
+        Background background = new Background(WHITE);
+        background.setName("Background");
+        background.setApplicationBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0));
+        rootScene.addChild(background);
+        rootScene.addChild(getBaseLight());
+        rootScene.addChild(contentScene);
+
+        if (viewMode == MODE_POINT_CLOUD) {
+            contentScene.addChild(createPointCloud(canvas, fileName, 0.5));
+        } else {
+            contentScene.addChild(createSphere(canvas, fileName, viewMode, 0.5));
+        }
+
+        contentScene.compile();
+        rootScene.compile();
+        universe.addBranchGraph(rootScene);
+
+        saveObjFile(rootScene, "./test_data/teapot.xyz");
+        exploreNodes(rootScene, 0);
     }
 
-    private Group createSphere(double scale, double xpos, double ypos, String fileName, Canvas3D canvas) {
+    private Group createSphere(Canvas3D canvas, String fileName, int viewMode, double scale) {
         Transform3D t = new Transform3D();
-        t.set(scale, new Vector3d(xpos, ypos, 0.0));
+        t.set(scale, new Vector3d(0, 0, 0));
+
         TransformGroup objTrans = new TransformGroup(t);
         objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
         objTrans.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
 
-        TransformGroup spinTg = new TransformGroup();
-        spinTg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        spinTg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        spinTg.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
-
-        Appearance app = new Appearance();
-
-        Color3f black = new Color3f(0.0f, 0.0f, 0.0f);
-        Color3f white = new Color3f(1.0f, 1.0f, 1.0f);
-        Color3f gray = new Color3f(0.4f, 0.4f, 0.4f);
-
-        app.setMaterial(new Material(black, black, gray,
-                white, 80.0f));
+        Appearance appearance = new Appearance();
+        appearance.setMaterial(new Material(BLACK, BLACK, GRAY, WHITE, 80.0f));
 
         BranchGroup shape = loadObjFile(fileName);
         if (shape != null) {
             shape.setName("Loaded OBJ");
-
-            setWireFrame(shape);
-
-            TransparencyAttributes ta = new TransparencyAttributes();
-            ta.setTransparencyMode(TransparencyAttributes.BLENDED);
-            ta.setTransparency(0.2f);
-            app.setTransparencyAttributes(ta);
-
+            switch (viewMode) {
+                case MODE_WIREFRAME:
+                    setWireFrame(shape);
+                    break;
+                case MODE_WIREFRAME_FILL:
+                    setWireframeAndFill(shape);
+                    break;
+                case MODE_SMOOTH_SHADING:
+                    setSmoothShading(shape);
+                    break;
+                case MODE_FLAT_SHADING:
+                    setFlatShading(shape);
+                    break;
+                default:
+                    setWireFrame(shape);
+                    break;
+            }
         } else {
-            System.out.println("OBJオブジェクトのロードに失敗しました");
+            System.out.println("OBJ object is null");
         }
 
-        BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-
-        PickRotateBehavior behavior = new PickRotateBehavior(shape, canvas, bounds);
-        shape.addChild(behavior);
-
-        PickZoomBehavior behavior2 = new PickZoomBehavior(shape, canvas, bounds);
-        shape.addChild(behavior2);
-
-        PickTranslateBehavior behavior3 = new PickTranslateBehavior(shape, canvas, bounds);
-        shape.addChild(behavior3);
-
-        spinTg.addChild(shape);
-        objTrans.addChild(spinTg);
+        setBehavior(shape, canvas);
+        objTrans.addChild(shape);
 
         return objTrans;
     }
@@ -171,6 +189,37 @@ public class App extends JFrame {
         polyAttr.setCullFace(PolygonAttributes.CULL_NONE);
         appearance.setPolygonAttributes(polyAttr);
         displayMeshInfo(shape3D);
+    }
+
+    public void setWireframeAndFill(BranchGroup shape) {
+        Node node = shape.getChild(0);
+        if (node instanceof Shape3D) {
+            Shape3D originalShape = (Shape3D) node;
+            Geometry geometry = originalShape.getGeometry();
+
+            // fill
+            Appearance fillAppearance = new Appearance();
+            ColoringAttributes ca = new ColoringAttributes();
+            ca.setColor(GRAY);
+            fillAppearance.setColoringAttributes(ca);
+
+            // wireframe
+            Appearance wireframeAppearance = new Appearance();
+            PolygonAttributes polyAttr = new PolygonAttributes();
+            polyAttr.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+            polyAttr.setCullFace(PolygonAttributes.CULL_NONE);
+            wireframeAppearance.setPolygonAttributes(polyAttr);
+            ColoringAttributes ca2 = new ColoringAttributes();
+            ca2.setColor(BLACK);
+            wireframeAppearance.setColoringAttributes(ca2);
+
+            Shape3D fillShape = new Shape3D(geometry, fillAppearance);
+
+            Shape3D wireframeShape = new Shape3D(geometry, wireframeAppearance);
+
+            shape.addChild(fillShape);
+            shape.addChild(wireframeShape);
+        }
     }
 
     public void setSmoothShading(BranchGroup shape) {
@@ -213,35 +262,71 @@ public class App extends JFrame {
         }
     }
 
-    public void combineWireframeAndFill(BranchGroup shape) {
-        Node node = shape.getChild(0);
-        if (node instanceof Shape3D) {
-            Shape3D originalShape = (Shape3D) node;
-            Geometry geometry = originalShape.getGeometry();
+    public Group createPointCloud(Canvas3D canvas, String filename, double scale) {
+        Transform3D t = new Transform3D();
+        t.set(scale, new Vector3d(0, 0, 0));
 
-            // fill
-            Appearance fillAppearance = new Appearance();
-            ColoringAttributes ca = new ColoringAttributes();
-            ca.setColor(new Color3f(0.4f, 0.4f, 0.4f));
-            fillAppearance.setColoringAttributes(ca);
+        TransformGroup objTrans = new TransformGroup(t);
+        objTrans.setName("Transform Group");
+        objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        objTrans.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
 
-            // wireframe
-            Appearance wireframeAppearance = new Appearance();
-            PolygonAttributes polyAttr = new PolygonAttributes();
-            polyAttr.setPolygonMode(PolygonAttributes.POLYGON_LINE);
-            polyAttr.setCullFace(PolygonAttributes.CULL_NONE);
-            wireframeAppearance.setPolygonAttributes(polyAttr);
-            ColoringAttributes ca2 = new ColoringAttributes();
-            ca2.setColor(new Color3f(0.0f, 0.0f, 0.0f));
-            wireframeAppearance.setColoringAttributes(ca2);
+        PointAttributes pointAttributes = new PointAttributes();
+        pointAttributes.setName("Point Attributes");
+        pointAttributes.setPointSize(2.0f);
+        pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
+        pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_READ);
 
-            Shape3D fillShape = new Shape3D(geometry, fillAppearance);
+        Appearance appearance = new Appearance();
+        appearance.setName("Appearance");
+        appearance.setPointAttributes(pointAttributes);
+        ColoringAttributes ca = new ColoringAttributes();
+        ca.setColor(GRAY);
+        appearance.setColoringAttributes(ca);
 
-            Shape3D wireframeShape = new Shape3D(geometry, wireframeAppearance);
+        PointArray points = loadPointCloudFromOBJ(filename);
+        int numPoints = points.getVertexCount();
 
-            shape.addChild(fillShape);
-            shape.addChild(wireframeShape);
+        for (int i = 0; i < numPoints; i++) {
+            float[] coord = new float[3];
+            points.getCoordinate(i, coord);
         }
+
+        Shape3D pointCloudShape = createPointCloudShape(points);
+        pointCloudShape.setName("Point Cloud Shape");
+        pointCloudShape.setAppearance(appearance);
+
+        BranchGroup shape = new BranchGroup();
+        shape.setName("Shape Scene");
+        shape.addChild(pointCloudShape);
+        setBehavior(shape, canvas);
+
+        objTrans.addChild(shape);
+
+        return objTrans;
+    }
+
+    public Shape3D createPointCloudShape(PointArray points) {
+        PointAttributes pointAttributes = new PointAttributes();
+        pointAttributes.setName("Point Attributes");
+        pointAttributes.setPointSize(2.0f);
+        pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
+        pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_READ);
+
+        Appearance appearance = new Appearance();
+        appearance.setName("appearance");
+        appearance.setPointAttributes(pointAttributes);
+
+        ColoringAttributes ca = new ColoringAttributes();
+        ca.setColor(BLACK);
+        appearance.setColoringAttributes(ca);
+
+        Shape3D pointCloud = new Shape3D();
+        pointCloud.setGeometry(points);
+        pointCloud.setAppearance(appearance);
+
+        return pointCloud;
     }
 
     private PointArray loadPointCloudFromOBJ(String filename) {
@@ -270,76 +355,24 @@ public class App extends JFrame {
         return pointArray;
     }
 
-    // point cloud
-    public Shape3D createPointCloudShape(PointArray points) {
-        PointAttributes pointAttributes = new PointAttributes();
-        pointAttributes.setPointSize(2.0f);
-        pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
-        pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_READ);
-
-        Appearance appearance = new Appearance();
-        appearance.setPointAttributes(pointAttributes);
-
-        ColoringAttributes ca = new ColoringAttributes();
-        ca.setColor(new Color3f(0.0f, 0.0f, 0.0f));
-        appearance.setColoringAttributes(ca);
-
-        Shape3D pointCloud = new Shape3D();
-        pointCloud.setGeometry(points);
-        pointCloud.setAppearance(appearance);
-
-        return pointCloud;
-    }
-
-    public void addPointCloudToScene(BranchGroup sceneRoot, String filename, Canvas3D canvas) {
-        Transform3D t = new Transform3D();
-        t.set(1, new Vector3d(0, 0, 0.0));
-        TransformGroup objTrans = new TransformGroup(t);
-        objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        objTrans.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
-
-        TransformGroup spinTg = new TransformGroup();
-        spinTg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        spinTg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        spinTg.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
-
-        PointArray points = loadPointCloudFromOBJ(filename);
-        int numPoints = points.getVertexCount();
-
-        for (int i = 0; i < numPoints; i++) {
-            float[] coord = new float[3];
-            points.getCoordinate(i, coord);
-            System.out.println(Arrays.toString(coord));
-        }
-        Shape3D pointCloudShape = createPointCloudShape(points);
-        BranchGroup shape = new BranchGroup();
-        shape.addChild(pointCloudShape);
-
+    private void setBehavior(BranchGroup shape, Canvas3D canvas) {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-
-        PickRotateBehavior behavior = new PickRotateBehavior(shape, canvas, bounds);
-        shape.addChild(behavior);
-
+        PickRotateBehavior behavior1 = new PickRotateBehavior(shape, canvas, bounds);
+        shape.addChild(behavior1);
         PickZoomBehavior behavior2 = new PickZoomBehavior(shape, canvas, bounds);
         shape.addChild(behavior2);
-
         PickTranslateBehavior behavior3 = new PickTranslateBehavior(shape, canvas, bounds);
         shape.addChild(behavior3);
-
-        spinTg.addChild(shape);
-        objTrans.addChild(spinTg);
-
-        sceneRoot.addChild(objTrans);
     }
 
-    private void addLight(BranchGroup scene) {
+    private DirectionalLight getBaseLight() {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-        Color3f lightColor = new Color3f(1.0f, 1.0f, 1.0f);
+        Color3f lightColor = WHITE;
         Vector3f lightDirection = new Vector3f(-1.0f, -1.0f, -1.0f);
         DirectionalLight light = new DirectionalLight(lightColor, lightDirection);
         light.setInfluencingBounds(bounds);
-        scene.addChild(light);
+        light.setName("Base Light");
+        return light;
     }
 
     private BranchGroup loadObjFile(String filename) {
@@ -348,22 +381,22 @@ public class App extends JFrame {
 
         try {
             modelScene = loader.load(filename);
-            System.out.println("OBJファイルをロードしました: " + filename);
+            System.out.println("Find obj: " + filename);
         } catch (FileNotFoundException e) {
-            System.out.println("OBJファイルが見つかりません: " + e.getMessage());
+            System.out.println("Do not find obj: " + e.getMessage());
             return null;
         } catch (ParsingErrorException e) {
-            System.out.println("解析エラー: " + e.getMessage());
+            System.out.println("Reading error: " + e.getMessage());
             return null;
         } catch (IncorrectFormatException e) {
-            System.out.println("フォーマットエラー: " + e.getMessage());
+            System.out.println("File format error: " + e.getMessage());
             return null;
         }
 
         return modelScene.getSceneGroup();
     }
 
-    private void exploreNode(Node node, int depth) {
+    private void exploreNodes(Node node, int depth) {
         // Indentation for hierarchy visualization
         for (int i = 0; i < depth; i++) {
             System.out.print("  ");
@@ -377,7 +410,7 @@ public class App extends JFrame {
             Group group = (Group) node;
             Iterator<Node> iterator = group.getAllChildren();
             while (iterator.hasNext()) {
-                exploreNode(iterator.next(), depth + 1);
+                exploreNodes(iterator.next(), depth + 1);
             }
         }
     }
@@ -430,9 +463,5 @@ public class App extends JFrame {
         } catch (IOException e) {
             System.out.println("OBJファイルの保存中にエラーが発生しました: " + e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-        new App();
     }
 }
