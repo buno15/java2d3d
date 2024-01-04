@@ -1,5 +1,3 @@
-package Project1;
-
 import java.awt.Color;
 import java.util.List;
 

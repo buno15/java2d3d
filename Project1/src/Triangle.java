@@ -1,5 +1,3 @@
-package Project1;
-
 class Triangle {
     Point[] vertices;
 
