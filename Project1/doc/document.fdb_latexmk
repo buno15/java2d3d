@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1703683240 "/home/ergos/java2d3d/Project1/document/document.tex" "document.pdf" "document" 1703683241
+["pdflatex"] 1704770493 "/home/ergos/java2d3d/Project1/doc/document.tex" "document.pdf" "document" 1704770494
   "/etc/texmf/web2c/texmf.cnf" 1703669651 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/ergos/java2d3d/Project1/document/document.tex" 1703683240 6128 e7ad0bde513dc998d3e86fe3ab9d2444 ""
+  "/home/ergos/java2d3d/Project1/doc/document.tex" 1704770492 6196 208e99d20357874096829e2dfc456a0a ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm" 1136768653 1324 c910af8c371558dc20f2d7822f66fe64 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi12.tfm" 1136768653 1524 4414a8315f39513458b80dfc63bff03a ""
@@ -69,11 +69,11 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1703670612 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1703670658 2802778 5810057dc9ae2f18076ab1b753f4b373 ""
   "contourline.png" 1703681683 31562 256c69a3c202cd27b97fd39c42b9ff6c ""
-  "document.aux" 1703683241 3476 06cb1cf76ff1114f0a5a5660cec3666d "pdflatex"
-  "document.out" 1703683241 2737 d5904b14fbe46ae49c86b114ebc2bb5d "pdflatex"
-  "document.tex" 1703683240 6128 e7ad0bde513dc998d3e86fe3ab9d2444 ""
-  "document.toc" 1703683241 1377 6054ac54ad6216721a6b8e1b0f757a05 "pdflatex"
-  "filledcontourline.png" 1703682075 30024 24e91740ea2ac81aee53c1dee86460e0 ""
+  "document.aux" 1704770494 3494 b3d1cb38cd62e211cf71c0b3e84c42b6 "pdflatex"
+  "document.out" 1704770494 2737 d5904b14fbe46ae49c86b114ebc2bb5d "pdflatex"
+  "document.tex" 1704770492 6196 208e99d20357874096829e2dfc456a0a ""
+  "document.toc" 1704770494 1377 6054ac54ad6216721a6b8e1b0f757a05 "pdflatex"
+  "filledcontourline.png" 1704770470 35005 b659c4a7ad65442e723613b9b7530219 ""
   "gui.png" 1703682179 156265 402537ac38c05f7d29ab1055f895290e ""
   (generated)
   "document.aux"
