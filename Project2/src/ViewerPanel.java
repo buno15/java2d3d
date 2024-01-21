@@ -97,7 +97,7 @@ public class ViewerPanel extends JPanel {
         // view direction
         View view = universe.getViewer().getView();
         double frontClipDistance = 0.001;
-        double backClipDistance = 1000.0;
+        double backClipDistance = 10000.0;
         view.setFrontClipDistance(frontClipDistance);
         view.setBackClipDistance(backClipDistance);
         universe.getViewingPlatform().setNominalViewingTransform();

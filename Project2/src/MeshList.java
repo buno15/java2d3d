@@ -1,6 +1,7 @@
 package src;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
@@ -64,6 +65,32 @@ public class MeshList {
     public Vector getVertexNormal(int faceIdx, int vertIdx) {
         Face f = faces.get(faceIdx);
         return normals.get(f.getVNIndex(vertIdx));
+    }
+
+    public Vector3f[] getVertexNormalsArray() {
+        ArrayList<Vector> normals = new ArrayList<>(Collections.nCopies(vertices.size(), new Vector(0, 0, 0, 0)));
+
+        // Accumulate normals for each face
+        for (Face face : faces) {
+            Vector normal = face.normal; // Calculate face normal
+
+            // Add this normal to the normals of all vertices in the face
+            for (int i = 0; i < 3; i++) {
+                int index = face.getVIndex(i);
+                normals.set(index, normal);
+            }
+        }
+
+        for (Vector normal : normals) {
+            normal.normalize();
+        }
+
+        Vector3f[] normalsArray = new Vector3f[normals.size()];
+        for (int i = 0; i < normals.size(); i++) {
+            Vector normal = normals.get(i);
+            normalsArray[i] = new Vector3f(normal.x, normal.y, normal.z);
+        }
+        return normalsArray;
     }
 
     public void setNormals() {

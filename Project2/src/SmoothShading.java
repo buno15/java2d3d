@@ -20,7 +20,7 @@ public class SmoothShading {
 
     public Group setSmoothShading() {
         Point3f[] vertices = meshList.getVerticesArray();
-        Vector3f[] normals = meshList.getNormalsArray();
+        Vector3f[] normals = meshList.getVertexNormalsArray();
 
         int numFaces = meshList.getNumFaces();
         TriangleArray triangleArray = new TriangleArray(numFaces * 3,
@@ -30,11 +30,11 @@ public class SmoothShading {
             Face face = meshList.getFace(i);
             int index = i * 3;
             triangleArray.setCoordinate(index, vertices[face.getVIndex(0)]);
-            triangleArray.setNormal(index, normals[i]);
+            triangleArray.setNormal(index, normals[face.getVIndex(0)]);
             triangleArray.setCoordinate(index + 1, vertices[face.getVIndex(1)]);
-            triangleArray.setNormal(index + 1, normals[i]);
+            triangleArray.setNormal(index + 1, normals[face.getVIndex(1)]);
             triangleArray.setCoordinate(index + 2, vertices[face.getVIndex(2)]);
-            triangleArray.setNormal(index + 2, normals[i]);
+            triangleArray.setNormal(index + 2, normals[face.getVIndex(2)]);
         }
 
         Appearance appearance = new Appearance();

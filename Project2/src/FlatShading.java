@@ -20,7 +20,6 @@ public class FlatShading {
 
     public Group setFlatShading() {
         Point3f[] vertices = meshList.getVerticesArray();
-        Vector3f[] normals = meshList.getNormalsArray();
 
         int numFaces = meshList.getNumFaces();
         TriangleArray triangleArray = new TriangleArray(numFaces * 3,
@@ -28,13 +27,14 @@ public class FlatShading {
 
         for (int i = 0; i < numFaces; i++) {
             Face face = meshList.getFace(i);
+            Vector3f normal = new Vector3f(face.normal.x, face.normal.y, face.normal.z);
             int index = i * 3;
             triangleArray.setCoordinate(index, vertices[face.getVIndex(0)]);
-            triangleArray.setNormal(index, normals[i]);
+            triangleArray.setNormal(index, normal);
             triangleArray.setCoordinate(index + 1, vertices[face.getVIndex(1)]);
-            triangleArray.setNormal(index + 1, normals[i]);
+            triangleArray.setNormal(index + 1, normal);
             triangleArray.setCoordinate(index + 2, vertices[face.getVIndex(2)]);
-            triangleArray.setNormal(index + 2, normals[i]);
+            triangleArray.setNormal(index + 2, normal);
         }
 
         Appearance appearance = new Appearance();

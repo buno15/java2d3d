@@ -7,7 +7,7 @@ public class Face {
     private ArrayList<Integer> vertexIndices;
     private ArrayList<Integer> textureIndices;
     private ArrayList<Integer> vertexNormalIndices;
-    private Vector normal;
+    Vector normal;
 
     public Face(int nV) {
         numVertices = nV;
