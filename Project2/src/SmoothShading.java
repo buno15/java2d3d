@@ -1,13 +1,25 @@
 package src;
 
 import org.jogamp.java3d.Appearance;
+import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Canvas3D;
 import org.jogamp.java3d.ColoringAttributes;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Material;
 import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.Shape3D;
+import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.TriangleArray;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseBehavior;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseRotate;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseTranslate;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseZoom;
+import org.jogamp.java3d.utils.picking.behaviors.PickMouseBehavior;
+import org.jogamp.java3d.utils.picking.behaviors.PickRotateBehavior;
+import org.jogamp.java3d.utils.picking.behaviors.PickTranslateBehavior;
+import org.jogamp.java3d.utils.picking.behaviors.PickZoomBehavior;
+import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
 
@@ -18,7 +30,7 @@ public class SmoothShading {
         this.meshList = meshList;
     }
 
-    public Group setSmoothShading() {
+    public Group setSmoothShading(Canvas3D canvas) {
         Point3f[] vertices = meshList.getVerticesArray();
         Vector3f[] normals = meshList.getVertexNormalsArray();
 

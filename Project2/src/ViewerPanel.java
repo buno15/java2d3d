@@ -21,11 +21,14 @@ import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Material;
 import org.jogamp.java3d.Node;
-import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.Shape3D;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.View;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseBehavior;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseRotate;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseTranslate;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseZoom;
 import org.jogamp.java3d.utils.picking.behaviors.PickRotateBehavior;
 import org.jogamp.java3d.utils.picking.behaviors.PickTranslateBehavior;
 import org.jogamp.java3d.utils.picking.behaviors.PickZoomBehavior;
@@ -109,7 +112,7 @@ public class ViewerPanel extends JPanel {
         rootScene.addChild(background);
         rootScene.addChild(getBaseLight());
         rootScene.addChild(contentScene);
-        setBehavior(rootScene, canvas);
+        setBehavior(rootScene, viewTransformGroup, canvas);
 
         contentScene.addChild(createSphere(canvas, fileName, viewMode, 0.5));
 
@@ -151,7 +154,7 @@ public class ViewerPanel extends JPanel {
                     break;
                 case MODE_SMOOTH_SHADING:
                     SmoothShading smoothShading = new SmoothShading(meshList);
-                    shape.addChild(smoothShading.setSmoothShading());
+                    shape.addChild(smoothShading.setSmoothShading(canvas));
                     break;
                 case MODE_FLAT_SHADING:
                     FlatShading flatShading = new FlatShading(meshList);
@@ -164,7 +167,7 @@ public class ViewerPanel extends JPanel {
         return objTrans;
     }
 
-    private void setBehavior(BranchGroup shape, Canvas3D canvas) {
+    private void setBehavior(BranchGroup shape, TransformGroup tg, Canvas3D canvas) {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
         PickRotateBehavior behavior1 = new PickRotateBehavior(shape, canvas, bounds);
         shape.addChild(behavior1);
@@ -172,6 +175,19 @@ public class ViewerPanel extends JPanel {
         shape.addChild(behavior2);
         PickTranslateBehavior behavior3 = new PickTranslateBehavior(shape, canvas, bounds);
         shape.addChild(behavior3);
+
+        // MouseBehavior behavior4 = new MouseRotate();
+        // behavior4.setTransformGroup(tg);
+        // behavior4.setSchedulingBounds(bounds);
+        // shape.addChild(behavior4);
+        // MouseBehavior behavior5 = new MouseTranslate();
+        // behavior5.setTransformGroup(tg);
+        // behavior5.setSchedulingBounds(bounds);
+        // shape.addChild(behavior5);
+        // MouseBehavior behavior6 = new MouseZoom();
+        // behavior6.setTransformGroup(tg);
+        // behavior6.setSchedulingBounds(bounds);
+        // shape.addChild(behavior6);
     }
 
     private DirectionalLight getBaseLight() {
