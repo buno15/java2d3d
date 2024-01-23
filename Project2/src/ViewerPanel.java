@@ -6,7 +6,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,6 +21,7 @@ import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Material;
 import org.jogamp.java3d.Node;
+import org.jogamp.java3d.PickRay;
 import org.jogamp.java3d.Shape3D;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
@@ -35,6 +35,9 @@ import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Vector3d;
 import org.jogamp.vecmath.Vector3f;
+
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.MouseListener;
 
 public class ViewerPanel extends JPanel {
     static final int MODE_POINT_CLOUD = 1;
@@ -164,7 +167,7 @@ public class ViewerPanel extends JPanel {
                     break;
                 case MODE_SMOOTH_SHADING:
                     SmoothShading smoothShading = new SmoothShading(meshList);
-                    shape.addChild(smoothShading.setSmoothShading(canvas));
+                    shape.addChild(smoothShading.setSmoothShading(canvas, chooseVertexIndex, minDistance, maxDistance));
                     break;
                 case MODE_FLAT_SHADING:
                     FlatShading flatShading = new FlatShading(meshList);
