@@ -25,13 +25,13 @@ public class FilledWireFrame {
         LineAttributes lineAttributes = new LineAttributes();
         lineAttributes.setLineWidth(2.0f);
         ColoringAttributes lineColor = new ColoringAttributes();
-        lineColor.setColor(Color.BLACK);
+        lineColor.setColor(PointColor.BLACK);
         Appearance lineAppearance = new Appearance();
         lineAppearance.setColoringAttributes(lineColor);
         lineAppearance.setLineAttributes(lineAttributes);
 
         ColoringAttributes faceColor = new ColoringAttributes();
-        faceColor.setColor(Color.GRAY);
+        faceColor.setColor(PointColor.GRAY);
         Appearance faceAppearance = new Appearance();
         faceAppearance.setColoringAttributes(faceColor);
 

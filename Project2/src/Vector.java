@@ -20,6 +20,14 @@ public class Vector {
         this.w = w;
     }
 
+    public void clearWeight() {
+        w = 1.0f;
+    }
+
+    public void setWeight(float weight) {
+        w = weight;
+    }
+
     public float dot(Vector target) {
         return x * target.x + y * target.y + z * target.z + w * target.w;
     }
@@ -39,5 +47,12 @@ public class Vector {
             y /= length;
             z /= length;
         }
+    }
+
+    public float distanceTo(Vector other) {
+        float dx = x - other.x;
+        float dy = y - other.y;
+        float dz = z - other.z;
+        return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 }

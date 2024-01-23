@@ -2,6 +2,7 @@ package src;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
@@ -23,24 +24,6 @@ public class MeshList {
         this.faces = faces;
     }
 
-    public Point3f[] getVerticesArray() {
-        Point3f[] verticesArray = new Point3f[vertices.size()];
-        for (int i = 0; i < vertices.size(); i++) {
-            Vector vertex = vertices.get(i);
-            verticesArray[i] = new Point3f(vertex.x, vertex.y, vertex.z);
-        }
-        return verticesArray;
-    }
-
-    public Vector3f[] getNormalsArray() {
-        Vector3f[] normalsArray = new Vector3f[normals.size()];
-        for (int i = 0; i < normals.size(); i++) {
-            Vector normal = normals.get(i);
-            normalsArray[i] = new Vector3f(normal.x, normal.y, normal.z);
-        }
-        return normalsArray;
-    }
-
     public int getNumVertices() {
         return vertices.size();
     }
@@ -57,6 +40,10 @@ public class MeshList {
         return vertices.get(vertIdx);
     }
 
+    public void setVertexWeight(int vertIdx, float weight) {
+        vertices.get(vertIdx).setWeight(weight);
+    }
+
     public Vector getVertex(int faceIdx, int vertIdx) {
         Face f = faces.get(faceIdx);
         return vertices.get(f.getVIndex(vertIdx));
@@ -65,6 +52,24 @@ public class MeshList {
     public Vector getVertexNormal(int faceIdx, int vertIdx) {
         Face f = faces.get(faceIdx);
         return normals.get(f.getVNIndex(vertIdx));
+    }
+
+    public Point3f[] getVerticesArray() {
+        Point3f[] verticesArray = new Point3f[vertices.size()];
+        for (int i = 0; i < vertices.size(); i++) {
+            Vector vertex = vertices.get(i);
+            verticesArray[i] = new Point3f(vertex.x, vertex.y, vertex.z);
+        }
+        return verticesArray;
+    }
+
+    public Vector3f[] getNormalsArray() {
+        Vector3f[] normalsArray = new Vector3f[normals.size()];
+        for (int i = 0; i < normals.size(); i++) {
+            Vector normal = normals.get(i);
+            normalsArray[i] = new Vector3f(normal.x, normal.y, normal.z);
+        }
+        return normalsArray;
     }
 
     public Vector3f[] getVertexNormalsArray() {
@@ -114,5 +119,43 @@ public class MeshList {
         normal.normalize();
 
         return normal;
+    }
+
+    public void clearVerticesWeight() {
+        for (Vector vertex : vertices) {
+            vertex.clearWeight();
+        }
+    }
+
+    public float getGeodesicDistance(int start, int end) {
+        Graph graph = createGraph();
+        List<Integer> path = Dijkstra.findShortestPath(graph, start, end);
+        return calculatePathDistance(path);
+    }
+
+    private Graph createGraph() {
+        Graph graph = new Graph(getNumVertices());
+
+        for (Face face : faces) {
+            for (int i = 0; i < face.getNumVertices(); i++) {
+                int v1 = face.getVIndex(i);
+                int v2 = face.getVIndex((i + 1) % face.getNumVertices());
+                float weight = vertices.get(v1).distanceTo(vertices.get(v2));
+                graph.addEdge(v1, v2, weight);
+                graph.addEdge(v2, v1, weight);
+            }
+        }
+
+        return graph;
+    }
+
+    private float calculatePathDistance(List<Integer> path) {
+        float totalDistance = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            Vector current = vertices.get(path.get(i));
+            Vector next = vertices.get(path.get(i + 1));
+            totalDistance += current.distanceTo(next);
+        }
+        return totalDistance;
     }
 }

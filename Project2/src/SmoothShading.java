@@ -59,7 +59,7 @@ public class SmoothShading {
         appearance.setPolygonAttributes(polyAttr);
 
         ColoringAttributes ca = new ColoringAttributes();
-        ca.setColor(Color.GRAY);
+        ca.setColor(PointColor.GRAY);
         appearance.setColoringAttributes(ca);
 
         Shape3D flatShading = new Shape3D(triangleArray, appearance);

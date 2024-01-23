@@ -37,7 +37,7 @@ public class WireFrame {
         LineAttributes lineAttributes = new LineAttributes();
         lineAttributes.setLineWidth(2.0f);
         ColoringAttributes ca = new ColoringAttributes();
-        ca.setColor(Color.BLACK);
+        ca.setColor(PointColor.BLACK);
         appearance.setColoringAttributes(ca);
         appearance.setLineAttributes(lineAttributes);
 

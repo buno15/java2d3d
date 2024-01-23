@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,10 +26,6 @@ import org.jogamp.java3d.Shape3D;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.View;
-import org.jogamp.java3d.utils.behaviors.mouse.MouseBehavior;
-import org.jogamp.java3d.utils.behaviors.mouse.MouseRotate;
-import org.jogamp.java3d.utils.behaviors.mouse.MouseTranslate;
-import org.jogamp.java3d.utils.behaviors.mouse.MouseZoom;
 import org.jogamp.java3d.utils.picking.behaviors.PickRotateBehavior;
 import org.jogamp.java3d.utils.picking.behaviors.PickTranslateBehavior;
 import org.jogamp.java3d.utils.picking.behaviors.PickZoomBehavior;
@@ -53,6 +50,9 @@ public class ViewerPanel extends JPanel {
     private BranchGroup contentScene;
 
     private MeshList meshList;
+    float maxDistance = Float.MIN_VALUE;
+    float minDistance = Float.MAX_VALUE;
+    int chooseVertexIndex = 0;
 
     @Override
     public void paintComponent(java.awt.Graphics g) {
@@ -64,9 +64,18 @@ public class ViewerPanel extends JPanel {
         this.fileName = fileName;
         System.out.println(this.viewMode + " : " + this.fileName);
 
+        ColorMapReader.readColorMapFile("./test_data/CoolWarmFloat257.csv");
+
         ObjReader objReader = new ObjReader();
         meshList = objReader.readobj(fileName);
         meshList.setNormals();
+
+        for (int i = 0; i < meshList.getNumVertices(); i++) {
+            float distance = meshList.getGeodesicDistance(chooseVertexIndex, i);
+            maxDistance = Math.max(maxDistance, distance);
+            minDistance = Math.min(minDistance, distance);
+            meshList.setVertexWeight(i, distance);
+        }
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
 
@@ -106,7 +115,7 @@ public class ViewerPanel extends JPanel {
         universe.getViewingPlatform().setNominalViewingTransform();
 
         // background color
-        Background background = new Background(Color.WHITE);
+        Background background = new Background(PointColor.WHITE);
         background.setName("Background");
         background.setApplicationBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0));
         rootScene.addChild(background);
@@ -134,7 +143,8 @@ public class ViewerPanel extends JPanel {
         objTrans.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
 
         Appearance appearance = new Appearance();
-        appearance.setMaterial(new Material(Color.BLACK, Color.BLACK, Color.GRAY, Color.WHITE, 80.0f));
+        appearance.setMaterial(
+                new Material(PointColor.BLACK, PointColor.BLACK, PointColor.GRAY, PointColor.WHITE, 80.0f));
 
         BranchGroup shape = new BranchGroup();
         if (shape != null) {
@@ -142,7 +152,7 @@ public class ViewerPanel extends JPanel {
             switch (viewMode) {
                 case MODE_POINT_CLOUD:
                     PointCloud pointCloud = new PointCloud(meshList);
-                    shape.addChild(pointCloud.createPointCloud());
+                    shape.addChild(pointCloud.createPointCloud(chooseVertexIndex, minDistance, maxDistance));
                     break;
                 case MODE_WIREFRAME:
                     WireFrame wireFrame = new WireFrame(meshList);
@@ -192,7 +202,7 @@ public class ViewerPanel extends JPanel {
 
     private DirectionalLight getBaseLight() {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-        Color3f lightColor = Color.GRAY;
+        Color3f lightColor = PointColor.GRAY;
         Vector3f lightDirection = new Vector3f(-1.0f, -1.0f, -1.0f);
         DirectionalLight light = new DirectionalLight(lightColor, lightDirection);
         light.setInfluencingBounds(bounds);
