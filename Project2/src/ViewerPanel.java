@@ -2,27 +2,15 @@ package src;
 
 import java.awt.BorderLayout;
 import java.awt.GraphicsConfiguration;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JPanel;
 
-import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.Background;
 import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Canvas3D;
 import org.jogamp.java3d.DirectionalLight;
-import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.Group;
-import org.jogamp.java3d.Material;
-import org.jogamp.java3d.Node;
-import org.jogamp.java3d.PickRay;
-import org.jogamp.java3d.Shape3D;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.View;
@@ -36,9 +24,6 @@ import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Vector3d;
 import org.jogamp.vecmath.Vector3f;
 
-import com.jogamp.newt.event.MouseEvent;
-import com.jogamp.newt.event.MouseListener;
-
 public class ViewerPanel extends JPanel {
     static final int MODE_POINT_CLOUD = 1;
     static final int MODE_WIREFRAME = 2;
@@ -46,13 +31,10 @@ public class ViewerPanel extends JPanel {
     static final int MODE_SMOOTH_SHADING = 4;
     static final int MODE_FLAT_SHADING = 5;
 
-    private String fileName;
-    private int viewMode = MODE_POINT_CLOUD;
-
     private Canvas3D canvas;
-    private BranchGroup contentScene;
+    private ColorMapManager cmm = new ColorMapManager();
 
-    private MeshList meshList;
+    private MeshManager meshManager;
     float maxDistance = Float.MIN_VALUE;
     float minDistance = Float.MAX_VALUE;
     int chooseVertexIndex = 0;
@@ -63,27 +45,22 @@ public class ViewerPanel extends JPanel {
     }
 
     public ViewerPanel(int viewMode, String fileName) {
-        this.viewMode = viewMode;
-        this.fileName = fileName;
-        System.out.println(this.viewMode + " : " + this.fileName);
-
-        ColorMapReader.readColorMapFile("./test_data/CoolWarmFloat257.csv");
+        cmm.readColorMapFile("./test_data/CoolWarmFloat257.csv");
 
         ObjReader objReader = new ObjReader();
-        meshList = objReader.readobj(fileName);
-        meshList.setNormals();
+        meshManager = objReader.readobj(fileName);
+        meshManager.setNormals();
 
-        for (int i = 0; i < meshList.getNumVertices(); i++) {
-            float distance = meshList.getGeodesicDistance(chooseVertexIndex, i);
+        for (int i = 0; i < meshManager.getNumVertices(); i++) {
+            float distance = meshManager.getGeodesicDistance(chooseVertexIndex, i);
             maxDistance = Math.max(maxDistance, distance);
             minDistance = Math.min(minDistance, distance);
-            meshList.setVertexWeight(i, distance);
+            meshManager.setVertexWeight(i, distance);
         }
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
-
-        setLayout(new BorderLayout());
         canvas = new Canvas3D(cf);
+        setLayout(new BorderLayout());
         add("Center", canvas);
         add(canvas, BorderLayout.CENTER);
         setOpaque(true);
@@ -96,11 +73,13 @@ public class ViewerPanel extends JPanel {
         rootScene.setCapability(BranchGroup.ALLOW_DETACH);
         rootScene.setName("Root Scene");
 
-        contentScene = new BranchGroup();
+        BranchGroup contentScene = new BranchGroup();
         contentScene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
         contentScene.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
         contentScene.setCapability(BranchGroup.ALLOW_DETACH);
         contentScene.setName("Content Scene");
+        contentScene.addChild(createSphere(viewMode, 0.2));
+        contentScene.compile();
 
         // camera position
         TransformGroup viewTransformGroup = viewingPlatform.getViewPlatformTransform();
@@ -118,69 +97,58 @@ public class ViewerPanel extends JPanel {
         universe.getViewingPlatform().setNominalViewingTransform();
 
         // background color
-        Background background = new Background(PointColor.WHITE);
+        Background background = new Background(ColorMapManager.WHITE);
         background.setName("Background");
         background.setApplicationBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0));
         rootScene.addChild(background);
         rootScene.addChild(getBaseLight());
         rootScene.addChild(contentScene);
-        setBehavior(rootScene, viewTransformGroup, canvas);
-
-        contentScene.addChild(createSphere(canvas, fileName, viewMode, 0.5));
-
-        contentScene.compile();
+        setBehavior(rootScene, viewTransformGroup);
         rootScene.compile();
+
         universe.addBranchGraph(rootScene);
-
-        saveObjFile(rootScene, "./test_data/teddy.xyz");
-        exploreNodes(rootScene, 0);
     }
 
-    private Group createSphere(Canvas3D canvas, String fileName, int viewMode, double scale) {
-        Transform3D t = new Transform3D();
-        t.set(scale, new Vector3d(0, 0, 0));
-
-        TransformGroup objTrans = new TransformGroup(t);
-        objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        objTrans.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
-
-        Appearance appearance = new Appearance();
-        appearance.setMaterial(
-                new Material(PointColor.BLACK, PointColor.BLACK, PointColor.GRAY, PointColor.WHITE, 80.0f));
-
-        BranchGroup shape = new BranchGroup();
-        if (shape != null) {
-            shape.setName("Shape Scene");
-            switch (viewMode) {
-                case MODE_POINT_CLOUD:
-                    PointCloud pointCloud = new PointCloud(meshList);
-                    shape.addChild(pointCloud.createPointCloud(canvas, chooseVertexIndex, minDistance, maxDistance));
-                    break;
-                case MODE_WIREFRAME:
-                    WireFrame wireFrame = new WireFrame(meshList);
-                    shape.addChild(wireFrame.setWireFrame());
-                    break;
-                case MODE_WIREFRAME_FILL:
-                    FilledWireFrame filledWireFrame = new FilledWireFrame(meshList);
-                    shape.addChild(filledWireFrame.setFilledWireFrame());
-                    break;
-                case MODE_SMOOTH_SHADING:
-                    SmoothShading smoothShading = new SmoothShading(meshList);
-                    shape.addChild(smoothShading.setSmoothShading(canvas, chooseVertexIndex, minDistance, maxDistance));
-                    break;
-                case MODE_FLAT_SHADING:
-                    FlatShading flatShading = new FlatShading(meshList);
-                    shape.addChild(flatShading.setFlatShading());
-                    break;
-            }
+    private Group createSphere(int viewMode, double scale) {
+        BranchGroup contentShape = new BranchGroup();
+        contentShape.setName("Shape Scene");
+        switch (viewMode) {
+            case MODE_POINT_CLOUD:
+                PointCloud pointCloud = new PointCloud(meshManager, cmm);
+                contentShape
+                        .addChild(pointCloud.createPointCloud(canvas, chooseVertexIndex, minDistance, maxDistance));
+                break;
+            case MODE_WIREFRAME:
+                WireFrame wireFrame = new WireFrame(meshManager);
+                contentShape.addChild(wireFrame.setWireFrame());
+                break;
+            case MODE_WIREFRAME_FILL:
+                FilledWireFrame filledWireFrame = new FilledWireFrame(meshManager);
+                contentShape.addChild(filledWireFrame.setFilledWireFrame());
+                break;
+            case MODE_FLAT_SHADING:
+                FlatShading flatShading = new FlatShading(meshManager);
+                contentShape.addChild(flatShading.setFlatShading());
+                break;
+            case MODE_SMOOTH_SHADING:
+                SmoothShading smoothShading = new SmoothShading(meshManager, cmm);
+                contentShape.addChild(
+                        smoothShading.setSmoothShading(canvas, chooseVertexIndex, minDistance, maxDistance));
+                break;
         }
-        objTrans.addChild(shape);
 
-        return objTrans;
+        Transform3D t3d = new Transform3D();
+        t3d.set(scale, new Vector3d(0, 0, 0));
+        TransformGroup tg = new TransformGroup(t3d);
+        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        tg.setCapability(TransformGroup.ENABLE_PICK_REPORTING);
+        tg.addChild(contentShape);
+
+        return tg;
     }
 
-    private void setBehavior(BranchGroup shape, TransformGroup tg, Canvas3D canvas) {
+    private void setBehavior(BranchGroup shape, TransformGroup tg) {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
         PickRotateBehavior behavior1 = new PickRotateBehavior(shape, canvas, bounds);
         shape.addChild(behavior1);
@@ -205,7 +173,7 @@ public class ViewerPanel extends JPanel {
 
     private DirectionalLight getBaseLight() {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-        Color3f lightColor = PointColor.GRAY;
+        Color3f lightColor = ColorMapManager.GRAY;
         Vector3f lightDirection = new Vector3f(-1.0f, -1.0f, -1.0f);
         DirectionalLight light = new DirectionalLight(lightColor, lightDirection);
         light.setInfluencingBounds(bounds);
@@ -213,48 +181,50 @@ public class ViewerPanel extends JPanel {
         return light;
     }
 
-    private void exploreNodes(Node node, int depth) {
-        // Indentation for hierarchy visualization
-        for (int i = 0; i < depth; i++) {
-            System.out.print("  ");
-        }
+    // private void exploreNodes(Node node, int depth) {
+    // // Indentation for hierarchy visualization
+    // for (int i = 0; i < depth; i++) {
+    // System.out.print(" ");
+    // }
 
-        // Print node class and name
-        System.out.println(node.getClass().getSimpleName() + ": " + node.getName());
+    // // Print node class and name
+    // System.out.println(node.getClass().getSimpleName() + ": " + node.getName());
 
-        // If this node is a group, explore its children
-        if (node instanceof Group) {
-            Group group = (Group) node;
-            Iterator<Node> iterator = group.getAllChildren();
-            while (iterator.hasNext()) {
-                exploreNodes(iterator.next(), depth + 1);
-            }
-        }
-    }
+    // // If this node is a group, explore its children
+    // if (node instanceof Group) {
+    // Group group = (Group) node;
+    // Iterator<Node> iterator = group.getAllChildren();
+    // while (iterator.hasNext()) {
+    // exploreNodes(iterator.next(), depth + 1);
+    // }
+    // }
+    // }
 
     // fixme: 未完成
-    private void saveObjFile(BranchGroup group, String filename) {
-        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(filename)))) {
-            AtomicBoolean shape3DNodeFound = new AtomicBoolean(false);
-            group.getAllChildren().forEachRemaining(node -> {
-                if (node instanceof Shape3D) {
-                    shape3DNodeFound.set(true);
-                    Shape3D shape = (Shape3D) node;
-                    GeometryArray geomArray = (GeometryArray) shape.getGeometry();
-                    float[] vertexData = new float[geomArray.getVertexCount() * 3];
-                    geomArray.getCoordinates(0, vertexData);
-                    for (int i = 0; i < vertexData.length; i += 3) {
-                        out.printf("v %f %f %f%n", vertexData[i], vertexData[i + 1], vertexData[i + 2]);
-                    }
-                }
-            });
-            if (!shape3DNodeFound.get()) {
-                System.out.println("Shape3D型のノードが見つかりませんでした。");
-            } else {
-                System.out.println("OBJファイルを保存しました: " + filename);
-            }
-        } catch (IOException e) {
-            System.out.println("OBJファイルの保存中にエラーが発生しました: " + e.getMessage());
-        }
-    }
+    // private void saveObjFile(BranchGroup group, String filename) {
+    // try (PrintWriter out = new PrintWriter(new BufferedWriter(new
+    // FileWriter(filename)))) {
+    // AtomicBoolean shape3DNodeFound = new AtomicBoolean(false);
+    // group.getAllChildren().forEachRemaining(node -> {
+    // if (node instanceof Shape3D) {
+    // shape3DNodeFound.set(true);
+    // Shape3D shape = (Shape3D) node;
+    // GeometryArray geomArray = (GeometryArray) shape.getGeometry();
+    // float[] vertexData = new float[geomArray.getVertexCount() * 3];
+    // geomArray.getCoordinates(0, vertexData);
+    // for (int i = 0; i < vertexData.length; i += 3) {
+    // out.printf("v %f %f %f%n", vertexData[i], vertexData[i + 1], vertexData[i +
+    // 2]);
+    // }
+    // }
+    // });
+    // if (!shape3DNodeFound.get()) {
+    // System.out.println("Shape3D型のノードが見つかりませんでした。");
+    // } else {
+    // System.out.println("OBJファイルを保存しました: " + filename);
+    // }
+    // } catch (IOException e) {
+    // System.out.println("OBJファイルの保存中にエラーが発生しました: " + e.getMessage());
+    // }
+    // }
 }

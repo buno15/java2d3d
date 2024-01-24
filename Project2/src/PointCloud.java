@@ -21,22 +21,25 @@ import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
 
 public class PointCloud {
-    MeshList meshList;
+    MeshManager meshList;
+    ColorMapManager cmm;
     float minScalar;
     float maxScalar;
 
-    public PointCloud(MeshList meshList) {
+    public PointCloud(MeshManager meshList, ColorMapManager cmm) {
         this.meshList = meshList;
+        this.cmm = cmm;
     }
 
-    public Group createPointCloud(Canvas3D canvas3d, int chooseVertexIndex, float minScalar, float maxScalar) {
+    public Group createPointCloud(Canvas3D canvas3d, int chooseVertexIndex, float minScalar,
+            float maxScalar) {
         this.minScalar = minScalar;
         this.maxScalar = maxScalar;
 
         PointArray choosePoint = new PointArray(1, PointArray.COORDINATES | PointArray.COLOR_3);
         choosePoint.setCoordinate(0, new Point3f(meshList.getVertex(chooseVertexIndex).x,
                 meshList.getVertex(chooseVertexIndex).y, meshList.getVertex(chooseVertexIndex).z));
-        choosePoint.setColor(0, PointColor.GREEN);
+        choosePoint.setColor(0, ColorMapManager.GREEN);
 
         PointAttributes choosePA = new PointAttributes();
         choosePA.setName("Point Attributes");
@@ -70,7 +73,7 @@ public class PointCloud {
             Vector vertex = meshList.getVertex(i);
             points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
 
-            Color color = ColorMap.getColorFromScalar(vertex.w, minScalar, maxScalar, ColorMapReader.colorMaps);
+            Color color = cmm.getColorFromScalar(vertex.w, minScalar, maxScalar);
             Color3f color3f = new Color3f((float) color.getRed() / 255.0f,
                     (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
 
@@ -121,7 +124,7 @@ public class PointCloud {
 
                 System.out.println("Selected Point Index: " + selectedPointIndex);
 
-                points.setColor(selectedPointIndex, PointColor.GREEN);
+                points.setColor(selectedPointIndex, ColorMapManager.GREEN);
 
                 float maxDistance = Float.MIN_VALUE;
                 float minDistance = Float.MAX_VALUE;
@@ -141,7 +144,7 @@ public class PointCloud {
 
                     Vector vertex = meshList.getVertex(i);
 
-                    Color color = ColorMap.getColorFromScalar(vertex.w, minScalar, maxScalar, ColorMapReader.colorMaps);
+                    Color color = cmm.getColorFromScalar(vertex.w, minScalar, maxScalar);
                     Color3f color3f = new Color3f((float) color.getRed() / 255.0f,
                             (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
 

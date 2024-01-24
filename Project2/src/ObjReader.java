@@ -16,7 +16,7 @@ public class ObjReader {
         faces = new ArrayList<Face>();
     }
 
-    public MeshList readobj(String filePath) {
+    public MeshManager readobj(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(new File(filePath)))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -58,11 +58,11 @@ public class ObjReader {
                     faces.add(f);
                 }
             }
-            return new MeshList(vertices, normals, faces);
+            return new MeshManager(vertices, normals, faces);
         } catch (Exception e) {
             System.out.println("Error in readobj");
             e.printStackTrace();
-            return new MeshList();
+            return new MeshManager();
         }
     }
 }

@@ -10,9 +10,9 @@ import org.jogamp.java3d.Shape3D;
 import org.jogamp.vecmath.Point3f;
 
 public class WireFrame {
-    MeshList meshList;
+    MeshManager meshList;
 
-    public WireFrame(MeshList meshList) {
+    public WireFrame(MeshManager meshList) {
         this.meshList = meshList;
     }
 
@@ -37,7 +37,7 @@ public class WireFrame {
         LineAttributes lineAttributes = new LineAttributes();
         lineAttributes.setLineWidth(2.0f);
         ColoringAttributes ca = new ColoringAttributes();
-        ca.setColor(PointColor.BLACK);
+        ca.setColor(ColorMapManager.BLACK);
         appearance.setColoringAttributes(ca);
         appearance.setLineAttributes(lineAttributes);
 

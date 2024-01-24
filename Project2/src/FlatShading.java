@@ -12,9 +12,9 @@ import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
 
 public class FlatShading {
-    MeshList meshList;
+    MeshManager meshList;
 
-    public FlatShading(MeshList meshList) {
+    public FlatShading(MeshManager meshList) {
         this.meshList = meshList;
     }
 
@@ -47,7 +47,7 @@ public class FlatShading {
         appearance.setPolygonAttributes(polyAttr);
 
         ColoringAttributes ca = new ColoringAttributes();
-        ca.setColor(PointColor.GRAY);
+        ca.setColor(ColorMapManager.GRAY);
         appearance.setColoringAttributes(ca);
 
         Shape3D flatShading = new Shape3D(triangleArray, appearance);

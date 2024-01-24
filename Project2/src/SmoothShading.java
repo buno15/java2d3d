@@ -27,12 +27,14 @@ import org.jogamp.java3d.utils.picking.PickResult;
 import org.jogamp.java3d.utils.picking.PickTool;
 
 public class SmoothShading {
-        MeshList meshList;
+        MeshManager meshList;
         float minScalar;
         float maxScalar;
+        ColorMapManager cmm;
 
-        public SmoothShading(MeshList meshList) {
+        public SmoothShading(MeshManager meshList, ColorMapManager cmm) {
                 this.meshList = meshList;
+                this.cmm = cmm;
         }
 
         public Group setSmoothShading(Canvas3D canvas, int chooseVertexIndex, float minScalar, float maxScalar) {
@@ -42,7 +44,7 @@ public class SmoothShading {
                 PointArray choosePoint = new PointArray(1, PointArray.COORDINATES | PointArray.COLOR_3);
                 choosePoint.setCoordinate(0, new Point3f(meshList.getVertex(chooseVertexIndex).x,
                                 meshList.getVertex(chooseVertexIndex).y, meshList.getVertex(chooseVertexIndex).z));
-                choosePoint.setColor(0, PointColor.GREEN);
+                choosePoint.setColor(0, ColorMapManager.GREEN);
 
                 PointAttributes choosePA = new PointAttributes();
                 choosePA.setName("Point Attributes");
@@ -80,18 +82,18 @@ public class SmoothShading {
                         float w2 = meshList.getVertex(face.getVIndex(1)).w;
                         float w3 = meshList.getVertex(face.getVIndex(2)).w;
 
-                        Color color1 = ColorMap.getColorFromScalar(w1,
-                                        minScalar, maxScalar, ColorMapReader.colorMaps);
+                        Color color1 = cmm.getColorFromScalar(w1,
+                                        minScalar, maxScalar);
                         Color3f color3f1 = new Color3f((float) color1.getRed() / 255.0f,
                                         (float) color1.getGreen() / 255.0f, (float) color1.getBlue() / 255.0f);
 
-                        Color color2 = ColorMap.getColorFromScalar(w2,
-                                        minScalar, maxScalar, ColorMapReader.colorMaps);
+                        Color color2 = cmm.getColorFromScalar(w2,
+                                        minScalar, maxScalar);
                         Color3f color3f2 = new Color3f((float) color2.getRed() / 255.0f,
                                         (float) color2.getGreen() / 255.0f, (float) color2.getBlue() / 255.0f);
 
-                        Color color3 = ColorMap.getColorFromScalar(w3,
-                                        minScalar, maxScalar, ColorMapReader.colorMaps);
+                        Color color3 = cmm.getColorFromScalar(w3,
+                                        minScalar, maxScalar);
                         Color3f color3f3 = new Color3f((float) color3.getRed() / 255.0f,
                                         (float) color3.getGreen() / 255.0f, (float) color3.getBlue() / 255.0f);
 
@@ -111,7 +113,7 @@ public class SmoothShading {
                 appearance.setPolygonAttributes(polyAttr);
 
                 ColoringAttributes ca = new ColoringAttributes();
-                ca.setColor(PointColor.GRAY);
+                ca.setColor(ColorMapManager.GRAY);
                 appearance.setColoringAttributes(ca);
 
                 Shape3D flatShading = new Shape3D(triangleArray, appearance);
@@ -158,7 +160,7 @@ public class SmoothShading {
 
                                 System.out.println("Selected Point Index: " + selectedPointIndex);
 
-                                triangleArray.setColor(selectedPointIndex, PointColor.GREEN);
+                                triangleArray.setColor(selectedPointIndex, ColorMapManager.GREEN);
 
                                 float maxDistance = Float.MIN_VALUE;
                                 float minDistance = Float.MAX_VALUE;
@@ -180,20 +182,20 @@ public class SmoothShading {
                                         float w2 = meshList.getVertex(face.getVIndex(1)).w;
                                         float w3 = meshList.getVertex(face.getVIndex(2)).w;
 
-                                        Color color1 = ColorMap.getColorFromScalar(w1,
-                                                        minScalar, maxScalar, ColorMapReader.colorMaps);
+                                        Color color1 = cmm.getColorFromScalar(w1,
+                                                        minScalar, maxScalar);
                                         Color3f color3f1 = new Color3f((float) color1.getRed() / 255.0f,
                                                         (float) color1.getGreen() / 255.0f,
                                                         (float) color1.getBlue() / 255.0f);
 
-                                        Color color2 = ColorMap.getColorFromScalar(w2,
-                                                        minScalar, maxScalar, ColorMapReader.colorMaps);
+                                        Color color2 = cmm.getColorFromScalar(w2,
+                                                        minScalar, maxScalar);
                                         Color3f color3f2 = new Color3f((float) color2.getRed() / 255.0f,
                                                         (float) color2.getGreen() / 255.0f,
                                                         (float) color2.getBlue() / 255.0f);
 
-                                        Color color3 = ColorMap.getColorFromScalar(w3,
-                                                        minScalar, maxScalar, ColorMapReader.colorMaps);
+                                        Color color3 = cmm.getColorFromScalar(w3,
+                                                        minScalar, maxScalar);
                                         Color3f color3f3 = new Color3f((float) color3.getRed() / 255.0f,
                                                         (float) color3.getGreen() / 255.0f,
                                                         (float) color3.getBlue() / 255.0f);

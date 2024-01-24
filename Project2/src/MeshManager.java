@@ -7,18 +7,18 @@ import java.util.List;
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
 
-public class MeshList {
+public class MeshManager {
     private ArrayList<Vector> vertices;
     private ArrayList<Vector> normals;
     private ArrayList<Face> faces;
 
-    public MeshList() {
+    public MeshManager() {
         vertices = new ArrayList<Vector>();
         normals = new ArrayList<Vector>();
         faces = new ArrayList<Face>();
     }
 
-    public MeshList(ArrayList<Vector> vertices, ArrayList<Vector> normals, ArrayList<Face> faces) {
+    public MeshManager(ArrayList<Vector> vertices, ArrayList<Vector> normals, ArrayList<Face> faces) {
         this.vertices = vertices;
         this.normals = normals;
         this.faces = faces;

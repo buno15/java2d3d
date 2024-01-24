@@ -12,9 +12,9 @@ import org.jogamp.java3d.TriangleArray;
 import org.jogamp.vecmath.Point3f;
 
 public class FilledWireFrame {
-    MeshList meshList;
+    MeshManager meshList;
 
-    public FilledWireFrame(MeshList meshList) {
+    public FilledWireFrame(MeshManager meshList) {
         this.meshList = meshList;
     }
 
@@ -25,13 +25,13 @@ public class FilledWireFrame {
         LineAttributes lineAttributes = new LineAttributes();
         lineAttributes.setLineWidth(2.0f);
         ColoringAttributes lineColor = new ColoringAttributes();
-        lineColor.setColor(PointColor.BLACK);
+        lineColor.setColor(ColorMapManager.BLACK);
         Appearance lineAppearance = new Appearance();
         lineAppearance.setColoringAttributes(lineColor);
         lineAppearance.setLineAttributes(lineAttributes);
 
         ColoringAttributes faceColor = new ColoringAttributes();
-        faceColor.setColor(PointColor.GRAY);
+        faceColor.setColor(ColorMapManager.GRAY);
         Appearance faceAppearance = new Appearance();
         faceAppearance.setColoringAttributes(faceColor);
 
