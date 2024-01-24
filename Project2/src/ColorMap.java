@@ -31,6 +31,6 @@ public class ColorMap {
             }
         }
 
-        return Color.BLACK;
+        return Color.BLUE;
     }
 }

@@ -8,5 +8,7 @@ public class PointColor {
     static final Color3f GRAY = new Color3f(0.6f, 0.6f, 0.6f);
     static final Color3f RED = new Color3f(1f, 0.0f, 0.0f);
     static final Color3f GREEN = new Color3f(0.0f, 1.0f, 0.0f);
+    static final Color3f BLUE = new Color3f(0.0f, 0.0f, 1.0f);
     static final Color3f YELLOW = new Color3f(1.0f, 1.0f, 0.0f);
+    static final Color3f MAX = new Color3f(0.2298057f, 0.298717966f, 0.753683153f);
 }

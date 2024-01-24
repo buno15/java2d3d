@@ -155,7 +155,7 @@ public class ViewerPanel extends JPanel {
             switch (viewMode) {
                 case MODE_POINT_CLOUD:
                     PointCloud pointCloud = new PointCloud(meshList);
-                    shape.addChild(pointCloud.createPointCloud(chooseVertexIndex, minDistance, maxDistance));
+                    shape.addChild(pointCloud.createPointCloud(canvas, chooseVertexIndex, minDistance, maxDistance));
                     break;
                 case MODE_WIREFRAME:
                     WireFrame wireFrame = new WireFrame(meshList);

@@ -1,31 +1,46 @@
 package src;
 
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Canvas3D;
+import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.PointArray;
 import org.jogamp.java3d.PointAttributes;
 import org.jogamp.java3d.Shape3D;
+import org.jogamp.java3d.utils.picking.PickCanvas;
+import org.jogamp.java3d.utils.picking.PickIntersection;
+import org.jogamp.java3d.utils.picking.PickResult;
+import org.jogamp.java3d.utils.picking.PickTool;
 import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
-import java.awt.Color;
 
 public class PointCloud {
     MeshList meshList;
+    float minScalar;
+    float maxScalar;
 
     public PointCloud(MeshList meshList) {
         this.meshList = meshList;
     }
 
-    public Group createPointCloud(int chooseVertexIndex, float minScalar, float maxScalar) {
+    public Group createPointCloud(Canvas3D canvas3d, int chooseVertexIndex, float minScalar, float maxScalar) {
+        this.minScalar = minScalar;
+        this.maxScalar = maxScalar;
+
         PointArray choosePoint = new PointArray(1, PointArray.COORDINATES | PointArray.COLOR_3);
         choosePoint.setCoordinate(0, new Point3f(meshList.getVertex(chooseVertexIndex).x,
                 meshList.getVertex(chooseVertexIndex).y, meshList.getVertex(chooseVertexIndex).z));
-        choosePoint.setColor(0, PointColor.BLACK);
+        choosePoint.setColor(0, PointColor.GREEN);
 
         PointAttributes choosePA = new PointAttributes();
         choosePA.setName("Point Attributes");
-        choosePA.setPointSize(15.0f);
+        choosePA.setPointSize(10.0f);
         choosePA.setPointAntialiasingEnable(true);
         choosePA.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
         choosePA.setCapability(PointAttributes.ALLOW_SIZE_READ);
@@ -38,7 +53,7 @@ public class PointCloud {
 
         PointAttributes pointAttributes = new PointAttributes();
         pointAttributes.setName("Point Attributes");
-        pointAttributes.setPointSize(5.0f);
+        pointAttributes.setPointSize(10.0f);
         pointAttributes.setPointAntialiasingEnable(true);
         pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
         pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_READ);
@@ -48,6 +63,8 @@ public class PointCloud {
 
         int numVertices = meshList.getNumVertices();
         PointArray points = new PointArray(numVertices, PointArray.COORDINATES | PointArray.COLOR_3);
+        points.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+        points.setCapability(GeometryArray.ALLOW_COLOR_READ);
 
         for (int i = 0; i < numVertices; i++) {
             Vector vertex = meshList.getVertex(i);
@@ -69,6 +86,70 @@ public class PointCloud {
         shape.addChild(pointCloud);
         shape.addChild(chooseS);
 
+        shape.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+        shape.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+        shape.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+        pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+        pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+        pointCloud.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+
+        canvas3d.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                pick(canvas3d, shape, pointCloud, points, e.getX(), e.getY());
+            }
+        });
+
         return shape;
+    }
+
+    private void pick(Canvas3D canvas3d, BranchGroup shape, Shape3D pointCloud, PointArray points, int x, int y) {
+        PickCanvas pickCanvas = new PickCanvas(canvas3d, shape);
+        pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
+        pickCanvas.setShapeLocation(x, y);
+        PickResult result = pickCanvas.pickClosest();
+
+        if (result != null) {
+            System.out.println(x + " " + y);
+
+            Point3d point3f = new Point3d(x, y, 0);
+            PickIntersection pi = result.getClosestIntersection(point3f);
+            int[] vertexIndices = pi.getPrimitiveCoordinateIndices();
+
+            if (vertexIndices.length > 0) {
+                int selectedPointIndex = vertexIndices[0];
+
+                System.out.println("Selected Point Index: " + selectedPointIndex);
+
+                points.setColor(selectedPointIndex, PointColor.GREEN);
+
+                float maxDistance = Float.MIN_VALUE;
+                float minDistance = Float.MAX_VALUE;
+
+                for (int i = 0; i < meshList.getNumVertices(); i++) {
+                    float distance = meshList.getGeodesicDistance(selectedPointIndex, i);
+                    maxDistance = Math.max(maxDistance, distance);
+                    minDistance = Math.min(minDistance, distance);
+                    meshList.setVertexWeight(i, distance);
+                }
+
+                int numVertices = meshList.getNumVertices();
+
+                for (int i = 0; i < numVertices; i++) {
+                    if (i == selectedPointIndex)
+                        continue;
+
+                    Vector vertex = meshList.getVertex(i);
+
+                    Color color = ColorMap.getColorFromScalar(vertex.w, minScalar, maxScalar, ColorMapReader.colorMaps);
+                    Color3f color3f = new Color3f((float) color.getRed() / 255.0f,
+                            (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
+
+                    points.setColor(i, color3f);
+                }
+
+                pointCloud.setGeometry(points);
+            }
+        }
     }
 }
