@@ -21,39 +21,15 @@ import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
 
 public class PointCloud {
-    MeshManager meshList;
+    MeshManager meshManager;
     ColorMapManager cmm;
-    float minScalar;
-    float maxScalar;
 
     public PointCloud(MeshManager meshList, ColorMapManager cmm) {
-        this.meshList = meshList;
+        this.meshManager = meshList;
         this.cmm = cmm;
     }
 
-    public Group createPointCloud(Canvas3D canvas3d, int chooseVertexIndex, float minScalar,
-            float maxScalar) {
-        this.minScalar = minScalar;
-        this.maxScalar = maxScalar;
-
-        PointArray choosePoint = new PointArray(1, PointArray.COORDINATES | PointArray.COLOR_3);
-        choosePoint.setCoordinate(0, new Point3f(meshList.getVertex(chooseVertexIndex).x,
-                meshList.getVertex(chooseVertexIndex).y, meshList.getVertex(chooseVertexIndex).z));
-        choosePoint.setColor(0, ColorMapManager.GREEN);
-
-        PointAttributes choosePA = new PointAttributes();
-        choosePA.setName("Point Attributes");
-        choosePA.setPointSize(10.0f);
-        choosePA.setPointAntialiasingEnable(true);
-        choosePA.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
-        choosePA.setCapability(PointAttributes.ALLOW_SIZE_READ);
-        Appearance chooseA = new Appearance();
-        chooseA.setName("Appearance");
-        chooseA.setPointAttributes(choosePA);
-
-        Shape3D chooseS = new Shape3D(choosePoint, new Appearance());
-        chooseS.setAppearance(chooseA);
-
+    public Group createPointCloud(Canvas3D canvas3d) {
         PointAttributes pointAttributes = new PointAttributes();
         pointAttributes.setName("Point Attributes");
         pointAttributes.setPointSize(10.0f);
@@ -64,16 +40,16 @@ public class PointCloud {
         appearance.setName("Appearance");
         appearance.setPointAttributes(pointAttributes);
 
-        int numVertices = meshList.getNumVertices();
+        int numVertices = meshManager.getNumVertices();
         PointArray points = new PointArray(numVertices, PointArray.COORDINATES | PointArray.COLOR_3);
         points.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
         points.setCapability(GeometryArray.ALLOW_COLOR_READ);
 
         for (int i = 0; i < numVertices; i++) {
-            Vector vertex = meshList.getVertex(i);
+            Vector vertex = meshManager.getVertex(i);
             points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
 
-            Color color = cmm.getColorFromScalar(vertex.w, minScalar, maxScalar);
+            Color color = cmm.getColorFromScalar(vertex.w, meshManager.minDistance, meshManager.maxDistance);
             Color3f color3f = new Color3f((float) color.getRed() / 255.0f,
                     (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
 
@@ -87,7 +63,6 @@ public class PointCloud {
         BranchGroup shape = new BranchGroup();
         shape.setName("Shape Scene");
         shape.addChild(pointCloud);
-        shape.addChild(chooseS);
 
         shape.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
         shape.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
@@ -126,25 +101,17 @@ public class PointCloud {
 
                 points.setColor(selectedPointIndex, ColorMapManager.GREEN);
 
-                float maxDistance = Float.MIN_VALUE;
-                float minDistance = Float.MAX_VALUE;
+                meshManager.setVerticesWeight(selectedPointIndex);
 
-                for (int i = 0; i < meshList.getNumVertices(); i++) {
-                    float distance = meshList.getGeodesicDistance(selectedPointIndex, i);
-                    maxDistance = Math.max(maxDistance, distance);
-                    minDistance = Math.min(minDistance, distance);
-                    meshList.setVertexWeight(i, distance);
-                }
-
-                int numVertices = meshList.getNumVertices();
+                int numVertices = meshManager.getNumVertices();
 
                 for (int i = 0; i < numVertices; i++) {
                     if (i == selectedPointIndex)
                         continue;
 
-                    Vector vertex = meshList.getVertex(i);
+                    Vector vertex = meshManager.getVertex(i);
 
-                    Color color = cmm.getColorFromScalar(vertex.w, minScalar, maxScalar);
+                    Color color = cmm.getColorFromScalar(vertex.w, meshManager.minDistance, meshManager.maxDistance);
                     Color3f color3f = new Color3f((float) color.getRed() / 255.0f,
                             (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
 

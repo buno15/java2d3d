@@ -35,9 +35,6 @@ public class ViewerPanel extends JPanel {
     private ColorMapManager cmm = new ColorMapManager();
 
     private MeshManager meshManager;
-    float maxDistance = Float.MIN_VALUE;
-    float minDistance = Float.MAX_VALUE;
-    int chooseVertexIndex = 0;
 
     @Override
     public void paintComponent(java.awt.Graphics g) {
@@ -50,13 +47,7 @@ public class ViewerPanel extends JPanel {
         ObjReader objReader = new ObjReader();
         meshManager = objReader.readobj(fileName);
         meshManager.setNormals();
-
-        for (int i = 0; i < meshManager.getNumVertices(); i++) {
-            float distance = meshManager.getGeodesicDistance(chooseVertexIndex, i);
-            maxDistance = Math.max(maxDistance, distance);
-            minDistance = Math.min(minDistance, distance);
-            meshManager.setVertexWeight(i, distance);
-        }
+        meshManager.setVerticesWeight(0);
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
         canvas = new Canvas3D(cf);
@@ -116,7 +107,7 @@ public class ViewerPanel extends JPanel {
             case MODE_POINT_CLOUD:
                 PointCloud pointCloud = new PointCloud(meshManager, cmm);
                 contentShape
-                        .addChild(pointCloud.createPointCloud(canvas, chooseVertexIndex, minDistance, maxDistance));
+                        .addChild(pointCloud.createPointCloud(canvas));
                 break;
             case MODE_WIREFRAME:
                 WireFrame wireFrame = new WireFrame(meshManager);
@@ -133,7 +124,8 @@ public class ViewerPanel extends JPanel {
             case MODE_SMOOTH_SHADING:
                 SmoothShading smoothShading = new SmoothShading(meshManager, cmm);
                 contentShape.addChild(
-                        smoothShading.setSmoothShading(canvas, chooseVertexIndex, minDistance, maxDistance));
+                        smoothShading.setSmoothShading(canvas,
+                                meshManager.chooseVertexIndex, meshManager.minDistance, meshManager.maxDistance));
                 break;
         }
 

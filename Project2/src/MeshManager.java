@@ -12,6 +12,10 @@ public class MeshManager {
     private ArrayList<Vector> normals;
     private ArrayList<Face> faces;
 
+    float maxDistance = Float.MIN_VALUE;
+    float minDistance = Float.MAX_VALUE;
+    int chooseVertexIndex = 0;
+
     public MeshManager() {
         vertices = new ArrayList<Vector>();
         normals = new ArrayList<Vector>();
@@ -124,6 +128,19 @@ public class MeshManager {
     public void clearVerticesWeight() {
         for (Vector vertex : vertices) {
             vertex.clearWeight();
+        }
+    }
+
+    public void setVerticesWeight(int chooseVertexIndex) {
+        minDistance = Float.MAX_VALUE;
+        maxDistance = Float.MIN_VALUE;
+        this.chooseVertexIndex = chooseVertexIndex;
+
+        for (int i = 0; i < getNumVertices(); i++) {
+            float distance = getGeodesicDistance(chooseVertexIndex, i);
+            maxDistance = Math.max(maxDistance, distance);
+            minDistance = Math.min(minDistance, distance);
+            setVertexWeight(i, distance);
         }
     }
 
