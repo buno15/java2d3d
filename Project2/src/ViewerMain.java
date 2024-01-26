@@ -12,12 +12,16 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class ViewerMain {
 
     static JFrame frame = new JFrame("Viewer");
     static ViewerPanel viewerPanel;
+    static JLabel verticesLabel;
+    static JLabel edgesLabel;
+    static JLabel trianglesLabel;
 
     static int viewMode = ViewerPanel.MODE_POINT_CLOUD;
     static String filePath = "./test_data/teddy.obj";
@@ -115,6 +119,21 @@ public class ViewerMain {
         leftPanel.add(flatButton);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
+        verticesLabel = new JLabel("Number of vertices: " + viewerPanel.getNumberOfVertices());
+        verticesLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        leftPanel.add(verticesLabel);
+        leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        edgesLabel = new JLabel("Number of edges: " + viewerPanel.getNumberOfEdges());
+        edgesLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        leftPanel.add(edgesLabel);
+        leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        trianglesLabel = new JLabel("Number of triangles: " + viewerPanel.getNumberOfTriangles());
+        trianglesLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        leftPanel.add(trianglesLabel);
+        leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
         frame.pack();
         frame.setVisible(true);
     }
@@ -126,5 +145,9 @@ public class ViewerMain {
         frame.add(viewerPanel);
         viewerPanel.revalidate();
         viewerPanel.repaint();
+
+        verticesLabel.setText("Number of vertices: " + viewerPanel.getNumberOfVertices());
+        edgesLabel.setText("Number of edges: " + viewerPanel.getNumberOfEdges());
+        trianglesLabel.setText("Number of triangles: " + viewerPanel.getNumberOfTriangles());
     }
 }

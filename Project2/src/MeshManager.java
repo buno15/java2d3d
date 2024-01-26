@@ -11,6 +11,7 @@ public class MeshManager {
     private ArrayList<Vector> vertices;
     private ArrayList<Vector> normals;
     private ArrayList<Face> faces;
+    private Graph graph;
 
     float maxDistance = Float.MIN_VALUE;
     float minDistance = Float.MAX_VALUE;
@@ -30,6 +31,16 @@ public class MeshManager {
 
     public int getNumVertices() {
         return vertices.size();
+    }
+
+    public int getNumEdges() {
+        if (graph == null)
+            return 0;
+        int size = 0;
+        for (int i = 0; i < graph.edges.size(); i++) {
+            size += graph.edges.get(i).size();
+        }
+        return size / 2;
     }
 
     public int getNumFaces() {
@@ -124,25 +135,25 @@ public class MeshManager {
     }
 
     public float getGeodesicDistance(int start, int end) {
-        Graph graph = createGraph();
+        createGraph();
         List<Integer> path = Dijkstra.findShortestPath(graph, start, end);
         return calculatePathDistance(path);
     }
 
-    private Graph createGraph() {
-        Graph graph = new Graph(getNumVertices());
+    private void createGraph() {
+        // graph = new Graph(getNumVertices());
 
-        for (Face face : faces) {
-            for (int i = 0; i < face.getNumVertices(); i++) {
-                int v1 = face.getVIndex(i);
-                int v2 = face.getVIndex((i + 1) % face.getNumVertices());
-                float weight = vertices.get(v1).distanceTo(vertices.get(v2));
-                graph.addEdge(v1, v2, weight);
-                graph.addEdge(v2, v1, weight);
-            }
-        }
+        // for (Face face : faces) {
+        // for (int i = 0; i < face.getNumVertices(); i++) {
+        // int v1 = face.getVIndex(i);
+        // int v2 = face.getVIndex((i + 1) % face.getNumVertices());
+        // float weight = vertices.get(v1).distanceTo(vertices.get(v2));
+        // graph.addEdge(v1, v2, weight);
+        // graph.addEdge(v2, v1, weight);
+        // }
+        // }
 
-        return graph;
+        graph = new KNearestNeighborsGraph(vertices, 1).buildGraph();
     }
 
     private float calculatePathDistance(List<Integer> path) {
@@ -154,4 +165,5 @@ public class MeshManager {
         }
         return totalDistance;
     }
+
 }

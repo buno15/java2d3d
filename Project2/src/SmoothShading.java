@@ -15,7 +15,6 @@ import org.jogamp.java3d.PointArray;
 import org.jogamp.java3d.PointAttributes;
 import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.Shape3D;
-import org.jogamp.java3d.TransparencyAttributes;
 import org.jogamp.java3d.TriangleArray;
 import org.jogamp.java3d.utils.picking.PickCanvas;
 import org.jogamp.java3d.utils.picking.PickIntersection;
@@ -147,7 +146,6 @@ public class SmoothShading {
                 return shape;
         }
 
-        // meshが選択されてしまう問題
         private void pick(Canvas3D canvas3d, BranchGroup shape, Shape3D smoothShading,
                         TriangleArray triangleArray, Shape3D pointCloud,
                         PointArray points, int x, int y) {

@@ -47,7 +47,7 @@ public class ViewerPanel extends JPanel {
         ObjReader objReader = new ObjReader();
         meshManager = objReader.readobj(fileName);
         meshManager.calculateFacesNormal();
-        // meshManager.calculateVerticesDistanceWeight(0);
+        meshManager.calculateVerticesDistanceWeight(0);
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
         canvas = new Canvas3D(cf);
@@ -98,6 +98,18 @@ public class ViewerPanel extends JPanel {
         rootScene.compile();
 
         universe.addBranchGraph(rootScene);
+    }
+
+    public int getNumberOfVertices() {
+        return meshManager.getNumVertices();
+    }
+
+    public int getNumberOfEdges() {
+        return meshManager.getNumEdges();
+    }
+
+    public int getNumberOfTriangles() {
+        return meshManager.getNumFaces();
     }
 
     private Group createSphere(int viewMode, double scale) {
