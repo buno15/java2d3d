@@ -52,7 +52,7 @@ public class ColorMapManager {
 
     // This method is used to get the color from the scalar value.
     public Color getColorFromScalar(double scalar, double minScalar, double maxScalar) {
-        double normalizedScalar = 1 - (scalar - minScalar) / (maxScalar - minScalar);
+        double normalizedScalar = (scalar - minScalar) / (maxScalar - minScalar);
 
         for (int i = 0; i < colorMaps.size() - 1; i++) {
             ColorMap lower = colorMaps.get(i);
@@ -66,6 +66,6 @@ public class ColorMapManager {
             }
         }
 
-        return Color.BLUE;
+        return Color.RED;
     }
 }

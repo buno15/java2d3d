@@ -101,7 +101,7 @@ public class PointCloud {
 
                 points.setColor(selectedPointIndex, ColorMapManager.GREEN);
 
-                meshManager.setVerticesWeight(selectedPointIndex);
+                meshManager.calculateVerticesDistanceWeight(selectedPointIndex);
 
                 int numVertices = meshManager.getNumVertices();
 

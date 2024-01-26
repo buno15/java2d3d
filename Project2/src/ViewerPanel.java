@@ -46,8 +46,8 @@ public class ViewerPanel extends JPanel {
 
         ObjReader objReader = new ObjReader();
         meshManager = objReader.readobj(fileName);
-        meshManager.setNormals();
-        meshManager.setVerticesWeight(0);
+        meshManager.calculateFacesNormal();
+        meshManager.calculateVerticesDistanceWeight(0);
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
         canvas = new Canvas3D(cf);
@@ -124,8 +124,7 @@ public class ViewerPanel extends JPanel {
             case MODE_SMOOTH_SHADING:
                 SmoothShading smoothShading = new SmoothShading(meshManager, cmm);
                 contentShape.addChild(
-                        smoothShading.setSmoothShading(canvas,
-                                meshManager.chooseVertexIndex, meshManager.minDistance, meshManager.maxDistance));
+                        smoothShading.setSmoothShading(canvas));
                 break;
         }
 

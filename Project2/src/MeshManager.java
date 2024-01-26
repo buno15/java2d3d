@@ -53,56 +53,36 @@ public class MeshManager {
         return vertices.get(f.getVIndex(vertIdx));
     }
 
-    public Vector getVertexNormal(int faceIdx, int vertIdx) {
-        Face f = faces.get(faceIdx);
-        return normals.get(f.getVNIndex(vertIdx));
+    public Point3f convertVectorToPoint3f(Vector v) {
+        return new Point3f(v.x, v.y, v.z);
     }
 
-    public Point3f[] getVerticesArray() {
-        Point3f[] verticesArray = new Point3f[vertices.size()];
-        for (int i = 0; i < vertices.size(); i++) {
-            Vector vertex = vertices.get(i);
-            verticesArray[i] = new Point3f(vertex.x, vertex.y, vertex.z);
-        }
-        return verticesArray;
+    public Vector3f convertVectorToVector3f(Vector v) {
+        return new Vector3f(v.x, v.y, v.z);
     }
 
-    public Vector3f[] getNormalsArray() {
-        Vector3f[] normalsArray = new Vector3f[normals.size()];
-        for (int i = 0; i < normals.size(); i++) {
-            Vector normal = normals.get(i);
-            normalsArray[i] = new Vector3f(normal.x, normal.y, normal.z);
-        }
-        return normalsArray;
-    }
+    public void calculateVerticesNorlmal() {
+        ArrayList<Vector> tmpNormals = new ArrayList<>(Collections.nCopies(vertices.size(), new Vector(0, 0, 0, 0)));
 
-    public Vector3f[] getVertexNormalsArray() {
-        ArrayList<Vector> normals = new ArrayList<>(Collections.nCopies(vertices.size(), new Vector(0, 0, 0, 0)));
-
-        // Accumulate normals for each face
         for (Face face : faces) {
-            Vector normal = face.normal; // Calculate face normal
+            Vector normal = face.normal;
 
-            // Add this normal to the normals of all vertices in the face
             for (int i = 0; i < 3; i++) {
                 int index = face.getVIndex(i);
-                normals.set(index, normal);
+                tmpNormals.set(index, normal);
             }
         }
 
-        for (Vector normal : normals) {
+        for (Vector normal : tmpNormals) {
             normal.normalize();
         }
 
-        Vector3f[] normalsArray = new Vector3f[normals.size()];
-        for (int i = 0; i < normals.size(); i++) {
-            Vector normal = normals.get(i);
-            normalsArray[i] = new Vector3f(normal.x, normal.y, normal.z);
+        for (int i = 0; i < tmpNormals.size(); i++) {
+            getVertex(i).setNormal(tmpNormals.get(i));
         }
-        return normalsArray;
     }
 
-    public void setNormals() {
+    public void calculateFacesNormal() {
         for (Face face : this.faces) {
             Vector v1 = vertices.get(face.getVIndex(0));
             Vector v2 = vertices.get(face.getVIndex(1));
@@ -111,7 +91,6 @@ public class MeshManager {
             Vector normal = calculateFaceNormal(v1, v2, v3);
 
             face.setNormal(normal);
-            normals.add(normal);
         }
     }
 
@@ -125,13 +104,13 @@ public class MeshManager {
         return normal;
     }
 
-    public void clearVerticesWeight() {
+    public void initVerticesWeight() {
         for (Vector vertex : vertices) {
-            vertex.clearWeight();
+            vertex.initWeight();
         }
     }
 
-    public void setVerticesWeight(int chooseVertexIndex) {
+    public void calculateVerticesDistanceWeight(int chooseVertexIndex) {
         minDistance = Float.MAX_VALUE;
         maxDistance = Float.MIN_VALUE;
         this.chooseVertexIndex = chooseVertexIndex;

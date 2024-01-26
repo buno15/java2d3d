@@ -12,29 +12,38 @@ import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
 
 public class FlatShading {
-    MeshManager meshList;
+    MeshManager meshManager;
 
-    public FlatShading(MeshManager meshList) {
-        this.meshList = meshList;
+    public FlatShading(MeshManager meshManager) {
+        this.meshManager = meshManager;
     }
 
     public Group setFlatShading() {
-        Point3f[] vertices = meshList.getVerticesArray();
-
-        int numFaces = meshList.getNumFaces();
+        int numFaces = meshManager.getNumFaces();
         TriangleArray triangleArray = new TriangleArray(numFaces * 3,
                 TriangleArray.COORDINATES | TriangleArray.NORMALS);
 
         for (int i = 0; i < numFaces; i++) {
-            Face face = meshList.getFace(i);
-            Vector3f normal = new Vector3f(face.normal.x, face.normal.y, face.normal.z);
+            Face face = meshManager.getFace(i);
             int index = i * 3;
-            triangleArray.setCoordinate(index, vertices[face.getVIndex(0)]);
-            triangleArray.setNormal(index, normal);
-            triangleArray.setCoordinate(index + 1, vertices[face.getVIndex(1)]);
-            triangleArray.setNormal(index + 1, normal);
-            triangleArray.setCoordinate(index + 2, vertices[face.getVIndex(2)]);
-            triangleArray.setNormal(index + 2, normal);
+
+            Vector normal = face.normal;
+            Vector3f n3f = meshManager.convertVectorToVector3f(normal);
+
+            Vector v1 = meshManager.getVertex(face.getVIndex(0));
+            Vector v2 = meshManager.getVertex(face.getVIndex(1));
+            Vector v3 = meshManager.getVertex(face.getVIndex(2));
+
+            Point3f p1 = meshManager.convertVectorToPoint3f(v1);
+            Point3f p2 = meshManager.convertVectorToPoint3f(v2);
+            Point3f p3 = meshManager.convertVectorToPoint3f(v3);
+
+            triangleArray.setCoordinate(index, p1);
+            triangleArray.setNormal(index, n3f);
+            triangleArray.setCoordinate(index + 1, p2);
+            triangleArray.setNormal(index + 1, n3f);
+            triangleArray.setCoordinate(index + 2, p3);
+            triangleArray.setNormal(index + 2, n3f);
         }
 
         Appearance appearance = new Appearance();

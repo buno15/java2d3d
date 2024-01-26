@@ -5,6 +5,7 @@ public class Vector {
     public float y;
     public float z;
     public float w;
+    public Vector normal;
 
     public Vector() {
         x = 0.0f;
@@ -20,12 +21,16 @@ public class Vector {
         this.w = w;
     }
 
-    public void clearWeight() {
+    public void initWeight() {
         w = 1.0f;
     }
 
     public void setWeight(float weight) {
         w = weight;
+    }
+
+    public void setNormal(Vector normal) {
+        this.normal = normal;
     }
 
     public float dot(Vector target) {
