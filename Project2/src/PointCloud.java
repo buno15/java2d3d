@@ -49,11 +49,7 @@ public class PointCloud {
             Vector vertex = meshManager.getVertex(i);
             points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
 
-            Color color = cmm.getColorFromScalar(vertex.w, meshManager.minDistance, meshManager.maxDistance);
-            Color3f color3f = new Color3f((float) color.getRed() / 255.0f,
-                    (float) color.getGreen() / 255.0f, (float) color.getBlue() / 255.0f);
-
-            points.setColor(i, color3f);
+            points.setColor(i, ColorMapManager.BLACK);
         }
 
         Shape3D pointCloud = new Shape3D(points, new Appearance());

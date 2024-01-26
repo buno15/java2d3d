@@ -66,6 +66,6 @@ public class ColorMapManager {
             }
         }
 
-        return Color.RED;
+        return Color.BLACK;
     }
 }

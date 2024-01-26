@@ -47,7 +47,7 @@ public class ViewerPanel extends JPanel {
         ObjReader objReader = new ObjReader();
         meshManager = objReader.readobj(fileName);
         meshManager.calculateFacesNormal();
-        meshManager.calculateVerticesDistanceWeight(0);
+        // meshManager.calculateVerticesDistanceWeight(0);
 
         GraphicsConfiguration cf = SimpleUniverse.getPreferredConfiguration();
         canvas = new Canvas3D(cf);

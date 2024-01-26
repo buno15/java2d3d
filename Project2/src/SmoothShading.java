@@ -11,8 +11,11 @@ import org.jogamp.java3d.ColoringAttributes;
 import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Material;
+import org.jogamp.java3d.PointArray;
+import org.jogamp.java3d.PointAttributes;
 import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.Shape3D;
+import org.jogamp.java3d.TransparencyAttributes;
 import org.jogamp.java3d.TriangleArray;
 import org.jogamp.java3d.utils.picking.PickCanvas;
 import org.jogamp.java3d.utils.picking.PickIntersection;
@@ -64,34 +67,35 @@ public class SmoothShading {
                         triangleArray.setCoordinate(index + 2, p3);
                         triangleArray.setNormal(index + 2, vn3);
 
-                        float w1 = v1.w;
-                        float w2 = v2.w;
-                        float w3 = v3.w;
+                        triangleArray.setColor(index, ColorMapManager.GRAY);
+                        triangleArray.setColor(index + 1, ColorMapManager.GRAY);
+                        triangleArray.setColor(index + 2, ColorMapManager.GRAY);
+                }
 
-                        Color color1 = cmm.getColorFromScalar(w1,
-                                        meshManager.minDistance, meshManager.maxDistance);
-                        Color3f color3f1 = new Color3f((float) color1.getRed() / 255.0f,
-                                        (float) color1.getGreen() / 255.0f, (float) color1.getBlue() / 255.0f);
+                int numVertices = meshManager.getNumVertices();
+                PointArray points = new PointArray(numVertices, PointArray.COORDINATES | PointArray.COLOR_3);
+                points.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+                points.setCapability(GeometryArray.ALLOW_COLOR_READ);
 
-                        Color color2 = cmm.getColorFromScalar(w2,
-                                        meshManager.minDistance, meshManager.maxDistance);
-                        Color3f color3f2 = new Color3f((float) color2.getRed() / 255.0f,
-                                        (float) color2.getGreen() / 255.0f, (float) color2.getBlue() / 255.0f);
+                for (int i = 0; i < numVertices; i++) {
+                        Vector vertex = meshManager.getVertex(i);
+                        points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
 
-                        Color color3 = cmm.getColorFromScalar(w3,
-                                        meshManager.minDistance, meshManager.maxDistance);
-                        Color3f color3f3 = new Color3f((float) color3.getRed() / 255.0f,
-                                        (float) color3.getGreen() / 255.0f, (float) color3.getBlue() / 255.0f);
-
-                        triangleArray.setColor(index, color3f1);
-                        triangleArray.setColor(index + 1, color3f2);
-                        triangleArray.setColor(index + 2, color3f3);
+                        points.setColor(i, ColorMapManager.BLACK);
                 }
 
                 Appearance appearance = new Appearance();
                 Material material = new Material();
                 material.setLightingEnable(true);
                 appearance.setMaterial(material);
+
+                PointAttributes pointAttributes = new PointAttributes();
+                pointAttributes.setName("Point Attributes");
+                pointAttributes.setPointSize(10.0f);
+                pointAttributes.setPointAntialiasingEnable(true);
+                pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_WRITE);
+                pointAttributes.setCapability(PointAttributes.ALLOW_SIZE_READ);
+                appearance.setPointAttributes(pointAttributes);
 
                 PolygonAttributes polyAttr = new PolygonAttributes();
                 polyAttr.setPolygonMode(PolygonAttributes.POLYGON_FILL);
@@ -102,32 +106,51 @@ public class SmoothShading {
                 ca.setColor(ColorMapManager.GRAY);
                 appearance.setColoringAttributes(ca);
 
-                Shape3D flatShading = new Shape3D(triangleArray, appearance);
+                Shape3D smoothShading = new Shape3D(triangleArray, appearance);
 
-                BranchGroup shape = new BranchGroup();
-                shape.setName("Shape Scene");
-                shape.addChild(flatShading);
+                BranchGroup shape1 = new BranchGroup();
+                shape1.setName("Shape Scene");
+                shape1.addChild(smoothShading);
 
-                shape.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
-                shape.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-                shape.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
-                flatShading.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-                flatShading.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-                flatShading.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+                Shape3D pointCloud = new Shape3D(points, appearance);
+
+                BranchGroup shape2 = new BranchGroup();
+                shape2.setName("Shape Scene");
+                shape2.addChild(pointCloud);
+
+                shape1.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+                shape1.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+                shape1.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+                shape2.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+                shape2.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+                shape2.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+                smoothShading.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+                smoothShading.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+                smoothShading.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+                pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+                pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+                pointCloud.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 
                 canvas.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
-                                pick(canvas, shape, flatShading, triangleArray, e.getX(), e.getY());
+                                pick(canvas, shape2, smoothShading, triangleArray, pointCloud, points, e.getX(),
+                                                e.getY());
                         }
                 });
+
+                BranchGroup shape = new BranchGroup();
+                shape.setName("Shape Scene");
+                shape.addChild(shape1);
+                shape.addChild(shape2);
 
                 return shape;
         }
 
         // meshが選択されてしまう問題
-        private void pick(Canvas3D canvas3d, BranchGroup shape, Shape3D pointCloud,
-                        TriangleArray triangleArray, int x, int y) {
+        private void pick(Canvas3D canvas3d, BranchGroup shape, Shape3D smoothShading,
+                        TriangleArray triangleArray, Shape3D pointCloud,
+                        PointArray points, int x, int y) {
                 PickCanvas pickCanvas = new PickCanvas(canvas3d, shape);
                 pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
                 pickCanvas.setShapeLocation(x, y);
@@ -145,7 +168,20 @@ public class SmoothShading {
 
                                 System.out.println("Selected Point Index: " + selectedPointIndex);
 
-                                triangleArray.setColor(selectedPointIndex, ColorMapManager.GREEN);
+                                points.setColor(selectedPointIndex, ColorMapManager.GREEN);
+
+                                meshManager.calculateVerticesDistanceWeight(selectedPointIndex);
+
+                                int numVertices = meshManager.getNumVertices();
+
+                                for (int i = 0; i < numVertices; i++) {
+                                        if (i == selectedPointIndex)
+                                                continue;
+
+                                        points.setColor(i, ColorMapManager.BLACK);
+                                }
+
+                                pointCloud.setGeometry(points);
 
                                 meshManager.calculateVerticesDistanceWeight(selectedPointIndex);
 
@@ -186,7 +222,7 @@ public class SmoothShading {
                                         triangleArray.setColor(index + 2, color3f3);
                                 }
 
-                                pointCloud.setGeometry(triangleArray);
+                                smoothShading.setGeometry(triangleArray);
                         }
                 }
         }
