@@ -60,4 +60,17 @@ public class Vector {
         float dz = z - other.z;
         return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
+
+    public float get(int axis) {
+        switch (axis) {
+            case 0:
+                return x;
+            case 1:
+                return y;
+            case 2:
+                return z;
+            default:
+                throw new IllegalArgumentException("Invalid axis");
+        }
+    }
 }
