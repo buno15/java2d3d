@@ -24,7 +24,7 @@ public class ViewerMain {
     static JLabel trianglesLabel;
 
     static int viewMode = ViewerPanel.MODE_POINT_CLOUD;
-    static String filePath = "./test_data/teddy.obj";
+    static String filePath = "./test_data/bunny.obj";
 
     public static void main(String[] args) {
         frame.setSize(1200, 800);

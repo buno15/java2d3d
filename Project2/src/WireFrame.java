@@ -18,16 +18,39 @@ public class WireFrame {
 
     public Group setWireFrame() {
         int numFaces = meshList.getNumFaces();
-        LineArray lines = new LineArray(numFaces * 6, LineArray.COORDINATES);
+        LineArray lines;
 
-        for (int i = 0; i < numFaces; i++) {
-            Face face = meshList.getFace(i);
-            for (int j = 0; j < face.getNumVertices(); j++) {
-                Vector vertex1 = meshList.getVertex(i, j);
-                Vector vertex2 = meshList.getVertex(i, (j + 1) % face.getNumVertices());
+        if (numFaces == 0) {
+            int edgeSize = 0;
+            for (int i = 0; i < meshList.getGraph().edges.size(); i++) {
+                edgeSize += meshList.getGraph().edges.get(i).size();
+            }
 
-                lines.setCoordinate(i * 6 + j * 2, new Point3f(vertex1.x, vertex1.y, vertex1.z));
-                lines.setCoordinate(i * 6 + j * 2 + 1, new Point3f(vertex2.x, vertex2.y, vertex2.z));
+            System.out.println("edgeSize: " + edgeSize);
+
+            lines = new LineArray(edgeSize, LineArray.COORDINATES);
+
+            Graph graph = meshList.getGraph();
+            for (int i = 0; i < graph.edges.size(); i++) {
+                Vector vertex1 = meshList.getVertex(i);
+                for (int j = 0; j < graph.edges.get(i).size(); j++) {
+                    Vector vertex2 = meshList.getVertex(graph.edges.get(i).get(j).to);
+                    lines.setCoordinate(i * 6 + j * 2, new Point3f(vertex1.x, vertex1.y, vertex1.z));
+                    lines.setCoordinate(i * 6 + j * 2 + 1, new Point3f(vertex2.x, vertex2.y, vertex2.z));
+                }
+            }
+        } else {
+            lines = new LineArray(numFaces * 6, LineArray.COORDINATES);
+
+            for (int i = 0; i < numFaces; i++) {
+                Face face = meshList.getFace(i);
+                for (int j = 0; j < face.getNumVertices(); j++) {
+                    Vector vertex1 = meshList.getVertex(i, j);
+                    Vector vertex2 = meshList.getVertex(i, (j + 1) % face.getNumVertices());
+
+                    lines.setCoordinate(i * 6 + j * 2, new Point3f(vertex1.x, vertex1.y, vertex1.z));
+                    lines.setCoordinate(i * 6 + j * 2 + 1, new Point3f(vertex2.x, vertex2.y, vertex2.z));
+                }
             }
         }
 

@@ -2,7 +2,9 @@ package src;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
@@ -27,6 +29,10 @@ public class MeshManager {
         this.vertices = vertices;
         this.normals = normals;
         this.faces = faces;
+    }
+
+    public Graph getGraph() {
+        return graph;
     }
 
     public int getNumVertices() {
@@ -126,6 +132,8 @@ public class MeshManager {
         maxDistance = Float.MIN_VALUE;
         this.chooseVertexIndex = chooseVertexIndex;
 
+        createKNNGraph(1000);
+
         for (int i = 0; i < getNumVertices(); i++) {
             float distance = getGeodesicDistance(chooseVertexIndex, i);
             maxDistance = Math.max(maxDistance, distance);
@@ -135,25 +143,24 @@ public class MeshManager {
     }
 
     public float getGeodesicDistance(int start, int end) {
-        createGraph();
+        // createGraph();
+
         List<Integer> path = Dijkstra.findShortestPath(graph, start, end);
         return calculatePathDistance(path);
     }
 
     private void createGraph() {
-        // graph = new Graph(getNumVertices());
+        graph = new Graph(getNumVertices());
 
-        // for (Face face : faces) {
-        // for (int i = 0; i < face.getNumVertices(); i++) {
-        // int v1 = face.getVIndex(i);
-        // int v2 = face.getVIndex((i + 1) % face.getNumVertices());
-        // float weight = vertices.get(v1).distanceTo(vertices.get(v2));
-        // graph.addEdge(v1, v2, weight);
-        // graph.addEdge(v2, v1, weight);
-        // }
-        // }
-
-        graph = new KNearestNeighborsGraph(vertices, 1).buildGraph();
+        for (Face face : faces) {
+            for (int i = 0; i < face.getNumVertices(); i++) {
+                int v1 = face.getVIndex(i);
+                int v2 = face.getVIndex((i + 1) % face.getNumVertices());
+                float weight = vertices.get(v1).distanceTo(vertices.get(v2));
+                graph.addEdge(v1, v2, weight);
+                graph.addEdge(v2, v1, weight);
+            }
+        }
     }
 
     private float calculatePathDistance(List<Integer> path) {
@@ -166,4 +173,47 @@ public class MeshManager {
         return totalDistance;
     }
 
+    public void createKNNGraph(int k) {
+        graph = new Graph(getNumVertices());
+
+        for (int i = 0; i < getNumVertices(); i++) {
+            Vector currentVertex = vertices.get(i);
+            PriorityQueue<VertexDistancePair> nearestNeighbors = new PriorityQueue<>(k,
+                    Comparator.comparingDouble(VertexDistancePair::getDistance));
+
+            for (int j = 0; j < getNumVertices(); j++) {
+                if (i != j) {
+                    Vector otherVertex = vertices.get(j);
+                    float distance = currentVertex.distanceTo(otherVertex);
+                    nearestNeighbors.add(new VertexDistancePair(j, distance));
+
+                    if (nearestNeighbors.size() > k) {
+                        nearestNeighbors.poll();
+                    }
+                }
+            }
+
+            for (VertexDistancePair pair : nearestNeighbors) {
+                graph.addEdge(i, pair.getVertexIndex(), pair.getDistance());
+            }
+        }
+    }
+
+    private static class VertexDistancePair {
+        private int vertexIndex;
+        private float distance;
+
+        public VertexDistancePair(int vertexIndex, float distance) {
+            this.vertexIndex = vertexIndex;
+            this.distance = distance;
+        }
+
+        public int getVertexIndex() {
+            return vertexIndex;
+        }
+
+        public float getDistance() {
+            return distance;
+        }
+    }
 }
