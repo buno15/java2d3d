@@ -132,7 +132,8 @@ public class MeshManager {
         maxDistance = Float.MIN_VALUE;
         this.chooseVertexIndex = chooseVertexIndex;
 
-        // createKNNGraph(3000);
+        if (getNumFaces() == 0)
+            createKNNGraph(300);
 
         for (int i = 0; i < getNumVertices(); i++) {
             float distance = getGeodesicDistance(chooseVertexIndex, i);
@@ -143,7 +144,8 @@ public class MeshManager {
     }
 
     public float getGeodesicDistance(int start, int end) {
-        createGraph();
+        if (getNumFaces() != 0)
+            createGraph();
 
         List<Integer> path = Dijkstra.findShortestPath(graph, start, end);
         return calculatePathDistance(path);

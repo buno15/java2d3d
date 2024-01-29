@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "PickTest",
+            "request": "launch",
+            "mainClass": "src.PickTest",
+            "projectName": "Project2_3e0b3742"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

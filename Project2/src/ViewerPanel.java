@@ -14,9 +14,10 @@ import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.View;
-import org.jogamp.java3d.utils.picking.behaviors.PickRotateBehavior;
-import org.jogamp.java3d.utils.picking.behaviors.PickTranslateBehavior;
-import org.jogamp.java3d.utils.picking.behaviors.PickZoomBehavior;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseRotate;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseTranslate;
+import org.jogamp.java3d.utils.behaviors.mouse.MouseZoom;
+import org.jogamp.java3d.utils.behaviors.vp.OrbitBehavior;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.java3d.utils.universe.ViewingPlatform;
 import org.jogamp.vecmath.Color3f;
@@ -87,6 +88,12 @@ public class ViewerPanel extends JPanel {
         view.setBackClipDistance(backClipDistance);
         universe.getViewingPlatform().setNominalViewingTransform();
 
+        OrbitBehavior orbit = new OrbitBehavior(canvas,
+                OrbitBehavior.REVERSE_ALL);
+        BoundingSphere bounds = new BoundingSphere(new Point3d(0., 0., 0.), 100.0);
+        orbit.setSchedulingBounds(bounds);
+        viewingPlatform.setViewPlatformBehavior(orbit);
+
         // background color
         Background background = new Background(ColorMapManager.WHITE);
         background.setName("Background");
@@ -94,7 +101,7 @@ public class ViewerPanel extends JPanel {
         rootScene.addChild(background);
         rootScene.addChild(getBaseLight());
         rootScene.addChild(contentScene);
-        setBehavior(rootScene, viewTransformGroup);
+        // setBehavior(rootScene, viewTransformGroup);
         rootScene.compile();
 
         universe.addBranchGraph(rootScene);
@@ -151,27 +158,33 @@ public class ViewerPanel extends JPanel {
         return tg;
     }
 
-    private void setBehavior(BranchGroup shape, TransformGroup tg) {
+    static void setBehavior(BranchGroup shape, TransformGroup tg) {
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
-        PickRotateBehavior behavior1 = new PickRotateBehavior(shape, canvas, bounds);
-        shape.addChild(behavior1);
-        PickZoomBehavior behavior2 = new PickZoomBehavior(shape, canvas, bounds);
-        shape.addChild(behavior2);
-        PickTranslateBehavior behavior3 = new PickTranslateBehavior(shape, canvas, bounds);
-        shape.addChild(behavior3);
+        // PickRotateBehavior behavior1 = new PickRotateBehavior(shape, canvas, bounds);
+        // shape.addChild(behavior1);
+        // PickZoomBehavior behavior2 = new PickZoomBehavior(shape, canvas, bounds);
+        // shape.addChild(behavior2);
+        // PickTranslateBehavior behavior3 = new PickTranslateBehavior(shape, canvas,
+        // bounds);
+        // shape.addChild(behavior3);
 
-        // MouseBehavior behavior4 = new MouseRotate();
-        // behavior4.setTransformGroup(tg);
-        // behavior4.setSchedulingBounds(bounds);
-        // shape.addChild(behavior4);
-        // MouseBehavior behavior5 = new MouseTranslate();
-        // behavior5.setTransformGroup(tg);
-        // behavior5.setSchedulingBounds(bounds);
-        // shape.addChild(behavior5);
-        // MouseBehavior behavior6 = new MouseZoom();
-        // behavior6.setTransformGroup(tg);
-        // behavior6.setSchedulingBounds(bounds);
-        // shape.addChild(behavior6);
+        // MouseBehaviorの設定
+        MouseRotate behavior4 = new MouseRotate();
+        behavior4.setTransformGroup(tg);
+        behavior4.setSchedulingBounds(bounds);
+        shape.addChild(behavior4);
+
+        MouseTranslate behavior5 = new MouseTranslate();
+        behavior5.setTransformGroup(tg);
+        behavior5.setSchedulingBounds(bounds);
+        behavior5.setFactor(0.001);
+        shape.addChild(behavior5);
+
+        MouseZoom behavior6 = new MouseZoom();
+        behavior6.setTransformGroup(tg);
+        behavior6.setSchedulingBounds(bounds);
+        behavior6.setFactor(0.1);
+        shape.addChild(behavior6);
     }
 
     private DirectionalLight getBaseLight() {
