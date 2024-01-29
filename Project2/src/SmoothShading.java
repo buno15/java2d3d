@@ -28,10 +28,12 @@ import org.jogamp.vecmath.Vector3f;
 public class SmoothShading {
         MeshManager meshManager;
         ColorMapManager cmm;
+        boolean chooseMode;
 
-        public SmoothShading(MeshManager meshManager, ColorMapManager cmm) {
+        public SmoothShading(MeshManager meshManager, ColorMapManager cmm, boolean chooseMode) {
                 this.meshManager = meshManager;
                 this.cmm = cmm;
+                this.chooseMode = chooseMode;
         }
 
         public Group setSmoothShading(Canvas3D canvas) {
@@ -71,18 +73,6 @@ public class SmoothShading {
                         triangleArray.setColor(index + 2, ColorMapManager.GRAY);
                 }
 
-                int numVertices = meshManager.getNumVertices();
-                PointArray points = new PointArray(numVertices, PointArray.COORDINATES | PointArray.COLOR_3);
-                points.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
-                points.setCapability(GeometryArray.ALLOW_COLOR_READ);
-
-                for (int i = 0; i < numVertices; i++) {
-                        Vector vertex = meshManager.getVertex(i);
-                        points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
-
-                        points.setColor(i, ColorMapManager.BLACK);
-                }
-
                 Appearance appearance = new Appearance();
                 Material material = new Material();
                 material.setLightingEnable(true);
@@ -111,37 +101,50 @@ public class SmoothShading {
                 shape1.setName("Shape Scene");
                 shape1.addChild(smoothShading);
 
-                Shape3D pointCloud = new Shape3D(points, appearance);
-
-                BranchGroup shape2 = new BranchGroup();
-                shape2.setName("Shape Scene");
-                shape2.addChild(pointCloud);
-
                 shape1.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
                 shape1.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
                 shape1.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
-                shape2.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
-                shape2.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-                shape2.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
                 smoothShading.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
                 smoothShading.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
                 smoothShading.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-                pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-                pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-                pointCloud.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-
-                canvas.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                                pick(canvas, shape2, smoothShading, triangleArray, pointCloud, points, e.getX(),
-                                                e.getY());
-                        }
-                });
 
                 BranchGroup shape = new BranchGroup();
                 shape.setName("Shape Scene");
                 shape.addChild(shape1);
-                shape.addChild(shape2);
+
+                if (chooseMode) {
+                        int numVertices = meshManager.getNumVertices();
+                        PointArray points = new PointArray(numVertices, PointArray.COORDINATES | PointArray.COLOR_3);
+                        points.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+                        points.setCapability(GeometryArray.ALLOW_COLOR_READ);
+
+                        for (int i = 0; i < numVertices; i++) {
+                                Vector vertex = meshManager.getVertex(i);
+                                points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
+
+                                points.setColor(i, ColorMapManager.BLACK);
+                        }
+
+                        Shape3D pointCloud = new Shape3D(points, appearance);
+                        BranchGroup shape2 = new BranchGroup();
+                        shape2.setName("Shape Scene");
+                        shape2.addChild(pointCloud);
+                        shape2.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+                        shape2.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+                        shape2.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+                        pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+                        pointCloud.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+                        pointCloud.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+
+                        canvas.addMouseListener(new MouseAdapter() {
+                                @Override
+                                public void mouseClicked(MouseEvent e) {
+                                        pick(canvas, shape2, smoothShading, triangleArray, pointCloud, points, e.getX(),
+                                                        e.getY());
+                                }
+                        });
+                        shape.addChild(shape2);
+                }
 
                 return shape;
         }

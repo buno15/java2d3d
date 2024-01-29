@@ -1,0 +1,25 @@
+\contentsline {section}{\numberline {1}Classes}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}ViewerMain.java}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}ViewerPanel.java}{2}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}MeshManager.java}{2}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Face.java}{2}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Vector.java}{2}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Dijkstra.java}{2}{subsection.1.6}%
+\contentsline {subsection}{\numberline {1.7}Graph.java}{2}{subsection.1.7}%
+\contentsline {subsection}{\numberline {1.8}PointCloud.java}{2}{subsection.1.8}%
+\contentsline {subsection}{\numberline {1.9}WireFrame.java}{2}{subsection.1.9}%
+\contentsline {subsection}{\numberline {1.10}FilledWireFrame.java}{2}{subsection.1.10}%
+\contentsline {subsection}{\numberline {1.11}FlatShading.java}{3}{subsection.1.11}%
+\contentsline {subsection}{\numberline {1.12}SmoothShading.java}{3}{subsection.1.12}%
+\contentsline {subsection}{\numberline {1.13}ColorMap.java}{3}{subsection.1.13}%
+\contentsline {subsection}{\numberline {1.14}ColorMapManager.java}{3}{subsection.1.14}%
+\contentsline {subsection}{\numberline {1.15}ObjReader.java}{3}{subsection.1.15}%
+\contentsline {section}{\numberline {2}FlatShading algorithm}{3}{section.2}%
+\contentsline {section}{\numberline {3}SmoothShading algorithm}{3}{section.3}%
+\contentsline {section}{\numberline {4}Geodesic Distance algorithm}{3}{section.4}%
+\contentsline {subsection}{\numberline {4.1}For data with triangle mesh information}{3}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}For PointCloud with only vertex information}{3}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Problems}{3}{section.5}%
+\contentsline {subsection}{\numberline {5.1}For PointCloud with only vertex information}{3}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Mouse translation problem}{4}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Screenshots}{4}{section.6}%

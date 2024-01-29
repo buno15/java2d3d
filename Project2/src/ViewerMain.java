@@ -34,7 +34,7 @@ public class ViewerMain {
 
         JPanel leftPanel = new JPanel();
         leftPanel.setBackground(Color.decode("#d2d2d2"));
-        leftPanel.setPreferredSize(new Dimension(200, 800));
+        leftPanel.setPreferredSize(new Dimension(300, 800));
         frame.add(leftPanel);
 
         viewerPanel = new ViewerPanel(ViewerPanel.MODE_POINT_CLOUD, filePath);
@@ -95,28 +95,40 @@ public class ViewerMain {
         leftPanel.add(wireframefillButton);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        JButton smoothButton = new JButton("Flat Shading");
+        JButton flatButton = new JButton("Flat Shading");
+        flatButton.setFont(new Font("Arial", Font.BOLD, 16));
+        flatButton.setSize(100, 50);
+        flatButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewMode = ViewerPanel.MODE_FLAT_SHADING;
+                updateViewerPanel();
+            }
+        });
+        leftPanel.add(flatButton);
+        leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
+
+        JButton smoothButton = new JButton("Smooth Shading");
         smoothButton.setFont(new Font("Arial", Font.BOLD, 16));
         smoothButton.setSize(100, 50);
         smoothButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                viewMode = ViewerPanel.MODE_FLAT_SHADING;
+                viewMode = ViewerPanel.MODE_SMOOTH_SHADING;
                 updateViewerPanel();
             }
         });
         leftPanel.add(smoothButton);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        JButton flatButton = new JButton("Smooth Shading");
-        flatButton.setFont(new Font("Arial", Font.BOLD, 16));
-        flatButton.setSize(100, 50);
-        flatButton.addActionListener(new ActionListener() {
+        JButton smoothChooseButton = new JButton("Choose Smooth Shading");
+        smoothChooseButton.setFont(new Font("Arial", Font.BOLD, 16));
+        smoothChooseButton.setSize(100, 50);
+        smoothChooseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                viewMode = ViewerPanel.MODE_SMOOTH_SHADING;
+                viewMode = ViewerPanel.MODE_SMOOTH_SHADING_CHOOSE;
                 updateViewerPanel();
             }
         });
-        leftPanel.add(flatButton);
+        leftPanel.add(smoothChooseButton);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
         verticesLabel = new JLabel("Number of vertices: " + viewerPanel.getNumberOfVertices());
