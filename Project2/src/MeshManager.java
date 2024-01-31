@@ -86,7 +86,7 @@ public class MeshManager {
 
             for (int i = 0; i < 3; i++) {
                 int index = face.getVIndex(i);
-                tmpNormals.set(index, normal);
+                tmpNormals.set(index, tmpNormals.get(index).add(normal));
             }
         }
 

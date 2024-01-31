@@ -22,7 +22,7 @@ Please see code for details. Here it will be written an overview of each class.
 A class with a main method. Has a JFrame. It composes the UI used by users.
 \subsection{ViewerPanel.java}
 A panel for displaying 3D models. The root object, Behavior, and Light are set.
-If you specify the file path and view mode, the specified 3D shape will be
+If user specify the file path and view mode, the specified 3D shape will be
 displayed.
 
 \subsection{MeshManager.java}
@@ -57,15 +57,36 @@ A class that imports and manages colormaps from csv
 Class that reads obj files
 
 \section{FlatShading algorithm}
+FlatShading.java performs flat shading of the input shape. First create a
+triangle mesh using TriangleArray. Next, specify the normal vector for each
+vertex of the triangle. Normal vector specifies the normal vector of the
+triangular mesh.
+\subsection{Normal vector of Mesh calculation}
+The calculateFaceNormal(Vector v1, Vector v2, Vector v3) method of the
+MeshManager class uses the given triangle
+vertex coordinates to calculate the vectors of the two edges of the triangle.
+Each edge vector is computed as a difference in vertex coordinates. Compute the
+cross product of edge vectors edge1 and edge2 to obtain the normal vector of
+the triangle. This normal vector indicates the orientation of the triangle's
+surface.
 
 \section{SmoothShading algorithm}
+SmoothShading.java creates smooth sharding of 3D shapes. First, create a
+triangle mesh using TriangleArray. Next, specify a normal vector for each
+vertex.
+\subsection{Normal vector of Vertices calculation}
+Calculate the normal vector of the vertex using the calculateVerticesNorlmal()
+method of the MeshManager class. The normal vector of each vertex is the
+average value of the normal vectors of
+neighboring meshes.
 
 \section{Geodesic Distance algorithm}
 
 \subsection{For data with triangle mesh information}
 A graph was constructed based on the information about the edges of the
 triangular mesh. Starting from the vertex selected by the user, the shortest
-path to all other vertices is calculated using Dijkstra's algorithm. Since all
+path to all other vertices is calculated using Dijkstra's algorithm. The
+distance between vertices is calculated based on Euclidean distance. Since all
 vertices are assigned a distance from the starting point, a color is set from
 the color map based on that.
 \subsection{For PointCloud with only vertex information}

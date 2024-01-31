@@ -75,45 +75,9 @@ public class PointCloud {
         pointCloud.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 
         canvas3d.addMouseListener(new MouseAdapter() {
-            private Point3f lastPoint = null;
-
             @Override
             public void mouseClicked(MouseEvent e) {
                 pick(canvas3d, shape, pointCloud, points, e.getX(), e.getY());
-            }
-
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (e.isControlDown()) {
-                    System.out.println("saf");
-                    if (lastPoint == null) {
-                        lastPoint = new Point3f(e.getX(), e.getY(), 0);
-                        return;
-                    }
-
-                    // マウスの移動量を計算
-                    float dx = e.getX() - lastPoint.x;
-                    float dy = e.getY() - lastPoint.y;
-
-                    // すべての頂点の位置を更新
-                    for (int i = 0; i < numVertices; i++) {
-                        Vector vertex = meshManager.getVertex(i);
-                        vertex.x += dx;
-                        vertex.y += dy;
-                        points.setCoordinate(i, new Point3f(vertex.x, vertex.y, vertex.z));
-                    }
-
-                    // 更新した座標を適用
-                    pointCloud.setGeometry(points);
-
-                    // 現在のマウスの位置を記録
-                    lastPoint = new Point3f(e.getX(), e.getY(), 0);
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                lastPoint = null;
             }
         });
 

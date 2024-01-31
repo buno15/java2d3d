@@ -10,31 +10,31 @@ import org.jogamp.java3d.Shape3D;
 import org.jogamp.vecmath.Point3f;
 
 public class WireFrame {
-    MeshManager meshList;
+    MeshManager meshManager;
 
-    public WireFrame(MeshManager meshList) {
-        this.meshList = meshList;
+    public WireFrame(MeshManager meshManager) {
+        this.meshManager = meshManager;
     }
 
     public Group setWireFrame() {
-        int numFaces = meshList.getNumFaces();
+        int numFaces = meshManager.getNumFaces();
         LineArray lines;
 
         if (numFaces == 0) {
             int edgeSize = 0;
-            for (int i = 0; i < meshList.getGraph().edges.size(); i++) {
-                edgeSize += meshList.getGraph().edges.get(i).size();
+            for (int i = 0; i < meshManager.getGraph().edges.size(); i++) {
+                edgeSize += meshManager.getGraph().edges.get(i).size();
             }
 
             System.out.println("edgeSize: " + edgeSize);
 
             lines = new LineArray(edgeSize, LineArray.COORDINATES);
 
-            Graph graph = meshList.getGraph();
+            Graph graph = meshManager.getGraph();
             for (int i = 0; i < graph.edges.size(); i++) {
-                Vector vertex1 = meshList.getVertex(i);
+                Vector vertex1 = meshManager.getVertex(i);
                 for (int j = 0; j < graph.edges.get(i).size(); j++) {
-                    Vector vertex2 = meshList.getVertex(graph.edges.get(i).get(j).to);
+                    Vector vertex2 = meshManager.getVertex(graph.edges.get(i).get(j).to);
                     lines.setCoordinate(i * 6 + j * 2, new Point3f(vertex1.x, vertex1.y, vertex1.z));
                     lines.setCoordinate(i * 6 + j * 2 + 1, new Point3f(vertex2.x, vertex2.y, vertex2.z));
                 }
@@ -43,10 +43,10 @@ public class WireFrame {
             lines = new LineArray(numFaces * 6, LineArray.COORDINATES);
 
             for (int i = 0; i < numFaces; i++) {
-                Face face = meshList.getFace(i);
+                Face face = meshManager.getFace(i);
                 for (int j = 0; j < face.getNumVertices(); j++) {
-                    Vector vertex1 = meshList.getVertex(i, j);
-                    Vector vertex2 = meshList.getVertex(i, (j + 1) % face.getNumVertices());
+                    Vector vertex1 = meshManager.getVertex(i, j);
+                    Vector vertex2 = meshManager.getVertex(i, (j + 1) % face.getNumVertices());
 
                     lines.setCoordinate(i * 6 + j * 2, new Point3f(vertex1.x, vertex1.y, vertex1.z));
                     lines.setCoordinate(i * 6 + j * 2 + 1, new Point3f(vertex2.x, vertex2.y, vertex2.z));

@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1706549456 "/home/ergos/java2d3d/Project2/doc/document.tex" "document.pdf" "document" 1706549458
+["pdflatex"] 1706681352 "/home/ergos/java2d3d/Project2/doc/document.tex" "document.pdf" "document" 1706681353
   "/etc/texmf/web2c/texmf.cnf" 1703669651 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/ergos/java2d3d/Project2/doc/document.tex" 1706549456 4222 53509f76e950aacfc3d9ceb05653eddc ""
+  "/home/ergos/java2d3d/Project2/doc/document.tex" 1706681352 5434 a713c1a0433f8f99a22660718f40d513 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm" 1136768653 1324 c910af8c371558dc20f2d7822f66fe64 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmmi12.tfm" 1136768653 1524 4414a8315f39513458b80dfc63bff03a ""
@@ -66,10 +66,10 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1703670612 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1703670658 2802778 5810057dc9ae2f18076ab1b753f4b373 ""
-  "document.aux" 1706549458 5040 c3080bb333361fafe67c25ef774af149 "pdflatex"
-  "document.out" 1706549458 3761 207091d8434f4c9ab370f41796d10da0 "pdflatex"
-  "document.tex" 1706549456 4222 53509f76e950aacfc3d9ceb05653eddc ""
-  "document.toc" 1706549458 2069 657050add12c7b0f892c7bf9f9e48284 "pdflatex"
+  "document.aux" 1706681353 5324 8f75447902ade4d385ebccf57deb3781 "pdflatex"
+  "document.out" 1706681353 4251 9a0d1a02b7b8e85e7536447f7c5816b5 "pdflatex"
+  "document.tex" 1706681352 5434 a713c1a0433f8f99a22660718f40d513 ""
+  "document.toc" 1706681353 2271 4dab0d2d331988279f21583731ba1c0c "pdflatex"
   "sc1.png" 1706528149 228231 0275fa5eda090438bdb8c0ed5d8d94c0 ""
   "sc2.png" 1706528149 87526 e5b55ffb33f2f64fda13b70b412df9f9 ""
   "sc3.png" 1706528149 91654 f0f47a26dfdaca02c86742e0e23c2e6e ""

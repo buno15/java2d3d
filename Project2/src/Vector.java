@@ -73,4 +73,12 @@ public class Vector {
                 throw new IllegalArgumentException("Invalid axis");
         }
     }
+
+    public Vector add(Vector other) {
+        float nx = x + other.x;
+        float ny = y + other.y;
+        float nz = z + other.z;
+
+        return new Vector(nx, ny, nz, 1.0f);
+    }
 }

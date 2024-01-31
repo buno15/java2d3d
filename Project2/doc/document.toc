@@ -15,11 +15,13 @@
 \contentsline {subsection}{\numberline {1.14}ColorMapManager.java}{3}{subsection.1.14}%
 \contentsline {subsection}{\numberline {1.15}ObjReader.java}{3}{subsection.1.15}%
 \contentsline {section}{\numberline {2}FlatShading algorithm}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Normal vector of Mesh calculation}{3}{subsection.2.1}%
 \contentsline {section}{\numberline {3}SmoothShading algorithm}{3}{section.3}%
-\contentsline {section}{\numberline {4}Geodesic Distance algorithm}{3}{section.4}%
-\contentsline {subsection}{\numberline {4.1}For data with triangle mesh information}{3}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}For PointCloud with only vertex information}{3}{subsection.4.2}%
-\contentsline {section}{\numberline {5}Problems}{3}{section.5}%
-\contentsline {subsection}{\numberline {5.1}For PointCloud with only vertex information}{3}{subsection.5.1}%
+\contentsline {subsection}{\numberline {3.1}Normal vector of Vertices calculation}{3}{subsection.3.1}%
+\contentsline {section}{\numberline {4}Geodesic Distance algorithm}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}For data with triangle mesh information}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}For PointCloud with only vertex information}{4}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Problems}{4}{section.5}%
+\contentsline {subsection}{\numberline {5.1}For PointCloud with only vertex information}{4}{subsection.5.1}%
 \contentsline {subsection}{\numberline {5.2}Mouse translation problem}{4}{subsection.5.2}%
 \contentsline {section}{\numberline {6}Screenshots}{4}{section.6}%
