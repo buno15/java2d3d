@@ -25,5 +25,31 @@ java2d3d/
 │       ├── riderr.vtk
 │       └── square.vtk
 ├── Project2/
+│   ├── doc
+│   │   ├── Java 2D&3D Graphics Project2.pdf	# presentation slide
+│   │   ├── document.pdf			# project2 document
+│   │   ├── document.tex
+│   ├── lib
+│   │   ├── j3dcore.jar
+│   │   ├── j3dutils.jar
+│   │   ├── jogamp-fat.jar
+│   │   └── vecmath.jar
+│   ├── src
+│   │   ├── ColorMap.java
+│   │   ├── ColorMapManager.java
+│   │   ├── Dijkstra.java
+│   │   ├── Face.java
+│   │   ├── FilledWireFrame.java
+│   │   ├── FlatShading.java
+│   │   ├── Graph.java
+│   │   ├── MeshManager.java
+│   │   ├── ObjReader.java
+│   │   ├── PointCloud.java
+│   │   ├── SmoothShading.java
+│   │   ├── Vector.java
+│   │   ├── ViewerMain.java			# main class
+│   │   ├── ViewerPanel.java
+│   │   └── WireFrame.java
+│   └── test_data
 └── README.md
 ```
