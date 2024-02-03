@@ -150,6 +150,7 @@ public class ViewerMain {
         frame.setVisible(true);
     }
 
+    // Update the viewer panel with the new view mode and file path
     static void updateViewerPanel() {
         frame.remove(viewerPanel);
         viewerPanel = new ViewerPanel(viewMode, filePath);

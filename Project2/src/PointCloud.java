@@ -84,6 +84,7 @@ public class PointCloud {
         return shape;
     }
 
+    // This method is used to pick the point for geodesic distance calculation.
     private void pick(Canvas3D canvas3d, BranchGroup shape, Shape3D pointCloud, PointArray points, int x, int y) {
         PickCanvas pickCanvas = new PickCanvas(canvas3d, shape);
         pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);

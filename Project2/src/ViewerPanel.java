@@ -117,6 +117,7 @@ public class ViewerPanel extends JPanel {
         return meshManager.getNumFaces();
     }
 
+    // create a sphere
     private Group createSphere(int viewMode, double scale) {
         BranchGroup contentShape = new BranchGroup();
         contentShape.setName("Shape Scene");
@@ -200,51 +201,4 @@ public class ViewerPanel extends JPanel {
         light.setName("Base Light");
         return light;
     }
-
-    // private void exploreNodes(Node node, int depth) {
-    // // Indentation for hierarchy visualization
-    // for (int i = 0; i < depth; i++) {
-    // System.out.print(" ");
-    // }
-
-    // // Print node class and name
-    // System.out.println(node.getClass().getSimpleName() + ": " + node.getName());
-
-    // // If this node is a group, explore its children
-    // if (node instanceof Group) {
-    // Group group = (Group) node;
-    // Iterator<Node> iterator = group.getAllChildren();
-    // while (iterator.hasNext()) {
-    // exploreNodes(iterator.next(), depth + 1);
-    // }
-    // }
-    // }
-
-    // fixme: 未完成
-    // private void saveObjFile(BranchGroup group, String filename) {
-    // try (PrintWriter out = new PrintWriter(new BufferedWriter(new
-    // FileWriter(filename)))) {
-    // AtomicBoolean shape3DNodeFound = new AtomicBoolean(false);
-    // group.getAllChildren().forEachRemaining(node -> {
-    // if (node instanceof Shape3D) {
-    // shape3DNodeFound.set(true);
-    // Shape3D shape = (Shape3D) node;
-    // GeometryArray geomArray = (GeometryArray) shape.getGeometry();
-    // float[] vertexData = new float[geomArray.getVertexCount() * 3];
-    // geomArray.getCoordinates(0, vertexData);
-    // for (int i = 0; i < vertexData.length; i += 3) {
-    // out.printf("v %f %f %f%n", vertexData[i], vertexData[i + 1], vertexData[i +
-    // 2]);
-    // }
-    // }
-    // });
-    // if (!shape3DNodeFound.get()) {
-    // System.out.println("Shape3D型のノードが見つかりませんでした。");
-    // } else {
-    // System.out.println("OBJファイルを保存しました: " + filename);
-    // }
-    // } catch (IOException e) {
-    // System.out.println("OBJファイルの保存中にエラーが発生しました: " + e.getMessage());
-    // }
-    // }
 }

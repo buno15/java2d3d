@@ -78,6 +78,7 @@ public class MeshManager {
         return new Vector3f(v.x, v.y, v.z);
     }
 
+    // useing for smooth shading
     public void calculateVerticesNorlmal() {
         ArrayList<Vector> tmpNormals = new ArrayList<>(Collections.nCopies(vertices.size(), new Vector(0, 0, 0, 0)));
 
@@ -99,6 +100,7 @@ public class MeshManager {
         }
     }
 
+    // useing for flat shading
     public void calculateFacesNormal() {
         for (Face face : this.faces) {
             Vector v1 = vertices.get(face.getVIndex(0));
@@ -111,6 +113,7 @@ public class MeshManager {
         }
     }
 
+    // useing for flat shading to calculate face normal
     private Vector calculateFaceNormal(Vector v1, Vector v2, Vector v3) {
         Vector edge1 = new Vector(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z, 1.0f);
         Vector edge2 = new Vector(v3.x - v1.x, v3.y - v1.y, v3.z - v1.z, 1.0f);
@@ -127,13 +130,14 @@ public class MeshManager {
         }
     }
 
+    // useing for geodesic distance
     public void calculateVerticesDistanceWeight(int chooseVertexIndex) {
         minDistance = Float.MAX_VALUE;
         maxDistance = Float.MIN_VALUE;
         this.chooseVertexIndex = chooseVertexIndex;
 
         if (getNumFaces() == 0)
-            createKNNGraph(300);
+            createKNNGraph(3000); // take too much time
 
         for (int i = 0; i < getNumVertices(); i++) {
             float distance = getGeodesicDistance(chooseVertexIndex, i);
@@ -175,6 +179,8 @@ public class MeshManager {
         return totalDistance;
     }
 
+    // useing for k-nearest neighbor graph to calculate geodesic distance (too much
+    // time)
     public void createKNNGraph(int k) {
         graph = new Graph(getNumVertices());
 

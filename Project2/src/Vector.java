@@ -74,6 +74,7 @@ public class Vector {
         }
     }
 
+    // vector + vector
     public Vector add(Vector other) {
         float nx = x + other.x;
         float ny = y + other.y;
